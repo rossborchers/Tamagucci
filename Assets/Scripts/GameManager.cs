@@ -173,6 +173,7 @@ public class GameManager : MonoBehaviour
     {
         if (Time.time - _lastCleanTime > 0.5f)
         {
+            _lastCleanTime = Time.time;
             if(_activePoop.Count > 0)
             {
                 Destroy(_activePoop[0]);
