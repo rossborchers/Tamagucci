@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b2b5d59e15624498090624c9b4237936, type: 3}
+  m_Name: Child
+  m_EditorClassIdentifier: 
+  IdleHappy: {fileID: 7400000, guid: 0fd557cb57c534448894941fb254d715, type: 2}
+  IdleSad: {fileID: 7400000, guid: 144a7bcb8fedb4d42a080d0aada7d3b8, type: 2}
+  IdleVeryHappy: {fileID: 7400000, guid: 0d326853d7288416385f175bb12ddddd, type: 2}
+  IdleVerySad: {fileID: 7400000, guid: 19017c9a34e984920805f9b741cd7c16, type: 2}
+  Speak: {fileID: 7400000, guid: f3daf763aa0a246879fbad25bf5b463a, type: 2}
+  Eat: {fileID: 7400000, guid: 8942cd0c2727e445bb02e3c8b7be82b0, type: 2}
+  EvolutionConditions: []
