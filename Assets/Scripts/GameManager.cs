@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using PowerTools;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class GameManager : MonoBehaviour
 {
@@ -12,6 +13,14 @@ public class GameManager : MonoBehaviour
 
     public EvolutionSettings GeneralSettings;
     public EvolutionPhase StartPhase;
+
+    private List<GameObject> _activePoop = new List<GameObject>();
+    public GameObject Poop;
+    public Transform PoopZone;
+
+    public GameObject Environment;
+
+    public SelectionMenu MainMenu;
     
     //runtime game state
     private EvolutionPhase currentPhase;
@@ -28,9 +37,11 @@ public class GameManager : MonoBehaviour
     private int MeatPoints;
     private int SweetPoints;
 
+    private float _lastPoop;
+    
     public void Update()
     {
-        bool firstUpdate = _lastStage != _currentStage;
+       
         if (_currentStage == EvolutionSettings.LifetimeStage.Egg)
         {
             _startGameTime = Time.time;
@@ -42,33 +53,51 @@ public class GameManager : MonoBehaviour
             _currentHits = GeneralSettings.EggHammerHits;
         }
         
+        bool firstUpdate = _lastStage != _currentStage;
         switch (_currentStage)
         {
             case EvolutionSettings.LifetimeStage.Egg:
                 _startGameTime = Time.time;
-                EggUpdate(firstUpdate);
+                if (EggUpdate(firstUpdate))
+                {
+                    _lastStage = _currentStage;
+                }
                 break;
             case EvolutionSettings.LifetimeStage.Dead:
-                DeadUpdate(firstUpdate);
+                DeadUpdate();
+                _lastStage = _currentStage;
                 break;
             default:
                 GeneralUpdate(_currentStage, firstUpdate);
+                if (Time.time - _lastPoop > 1f / GeneralSettings.PoopsPerSecond)
+                {
+                    GameObject poop = Instantiate(Poop);
+                    poop.transform.parent = PoopZone;
+                    var rand = Random.insideUnitCircle * 0.1f;
+                    poop.transform.localPosition = new Vector2(rand.x, rand.y);
+                    _lastPoop = Time.time;
+                    _activePoop.Add(poop);
+                }
+                _lastStage = _currentStage;
                 break;
         }
 
         TryMoveToNextStage();
-        _lastStage = _currentStage;
     }
    
-    private void EggUpdate(bool firstUpdate)
+    private bool EggUpdate(bool firstUpdate)
     {
         if (_hatched)
         {
             if (!BaseChar.IsPlaying(GeneralSettings.EggHatch))
             {
                 _currentStage = EvolutionSettings.LifetimeStage.Baby;
+                _lastPoop = Time.time;
+                MainMenu.Open();
+                return false;
             }
-            return;
+
+            return true;
         }
         
         if (firstUpdate)
@@ -101,9 +130,11 @@ public class GameManager : MonoBehaviour
                 BaseChar.Play(GeneralSettings.EggIdle);
             }
         }
+
+        return true;
     }
     
-    private void DeadUpdate(bool firstUpdate)
+    private void DeadUpdate()
     {
         if (!BaseChar.IsPlaying(GeneralSettings.Death))
         {
@@ -135,6 +166,47 @@ public class GameManager : MonoBehaviour
                 _currentStage = (EvolutionSettings.LifetimeStage) ((int)_currentStage) + 1;
             }
         }
+    }
+
+    private float _lastCleanTime;
+    public void Clean()
+    {
+        if (Time.time - _lastCleanTime > 0.5f)
+        {
+            if(_activePoop.Count > 0)
+            {
+                Destroy(_activePoop[0]);
+            }
+        }
+    }
+    
+
+    public void HideEnvironment()
+    {
+        Environment.SetActive(false);
+    }
+
+    public void ToggleLights()
+    {
+        //TODO:
+    }
+    
+    public void FeedVeg()
+    {
+        Environment.SetActive(true);
+        //TODO:
+    }
+    
+    public void FeedMeat()
+    {
+        Environment.SetActive(true);
+        //TODO:
+    }
+    
+    public void FeedSweet()
+    {
+        Environment.SetActive(true);
+        //TODO:
     }
 }
 

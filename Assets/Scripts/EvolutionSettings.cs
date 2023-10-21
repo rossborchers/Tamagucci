@@ -18,6 +18,7 @@ public class EvolutionSettings : ScriptableObject
    }
 
    public int EggHammerHits = 4;
+   public float PoopsPerSecond = 0.5f;
    
    public int BabyToTeenTime = 20;
    public int TeenToAdultTime = 40;

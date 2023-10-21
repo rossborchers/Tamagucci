@@ -12,6 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bf708d7ca9e5b45c1bbe68e89f21523a, type: 3}
   m_Name: Common
   m_EditorClassIdentifier: 
+  EggHammerHits: 4
+  PoopsPerSecond: 0.25
   BabyToTeenTime: 20
   TeenToAdultTime: 40
   AdultToSeniorTime: 100
