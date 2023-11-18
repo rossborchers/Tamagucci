@@ -31,7 +31,10 @@ public class EvolutionPhase : ScriptableObject
    [Space]
    public AnimationClip Speak;
    public AnimationClip Eat;
-   //public AnimationClip Sleep;
+   
+   [Space]
+   public AnimationClip Old;
+   public AnimationClip Death;
 
    [Space]
    public List<EvolutionCondition> EvolutionConditions;
