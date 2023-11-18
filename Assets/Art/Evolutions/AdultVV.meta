@@ -1,5 +1,7 @@
 fileFormatVersion: 2
 guid: 29ae75da2d438401d933161c3e3d03af
+labels:
+- Adult
 folderAsset: yes
 DefaultImporter:
   externalObjects: {}

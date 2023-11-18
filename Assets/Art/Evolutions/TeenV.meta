@@ -1,5 +1,7 @@
 fileFormatVersion: 2
 guid: cd16ad965f93849d48eb0805fef9b0ff
+labels:
+- Teen
 folderAsset: yes
 DefaultImporter:
   externalObjects: {}
