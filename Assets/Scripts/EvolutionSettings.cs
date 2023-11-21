@@ -46,7 +46,7 @@ public class EvolutionSettings : ScriptableObject
          case LifetimeStage.Adult: return AdultToSeniorTime;
          case LifetimeStage.Senior: return SeniorToDeadTime;
          case LifetimeStage.Dead: return DeadToRestartTime;
-         default: return 1; //LifetimeStage.Egg, LifetimeStage.None
+         default: return 0; //LifetimeStage.Egg, LifetimeStage.None
       }
    }
 }

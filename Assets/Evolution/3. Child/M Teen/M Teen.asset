@@ -12,11 +12,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b2b5d59e15624498090624c9b4237936, type: 3}
   m_Name: M Teen
   m_EditorClassIdentifier: 
-  IdleHappy: {fileID: 0}
-  IdleSad: {fileID: 0}
-  IdleVeryHappy: {fileID: 0}
-  IdleVerySad: {fileID: 0}
-  Speak: {fileID: 0}
-  Eat: {fileID: 0}
-  Sleep: {fileID: 0}
-  EvolutionConditions: []
+  IdleHappy: {fileID: 7400000, guid: 64a36fa367020472296e6c53358727b3, type: 2}
+  IdleSad: {fileID: 7400000, guid: adfd3755f1c70416a8f024c1295f0638, type: 2}
+  IdleVeryHappy: {fileID: 7400000, guid: b0c83cd1f8cc84e9aa8ddb6a52a4ee2f, type: 2}
+  IdleVerySad: {fileID: 7400000, guid: 02906251c183348f3997bbd4efe9d837, type: 2}
+  Speak: {fileID: 7400000, guid: 98efeb4d4d3b745aeb7a54b403180fa5, type: 2}
+  Eat: {fileID: 7400000, guid: b9801db03da49499f999479a70831bff, type: 2}
+  Old: {fileID: 0}
+  Death: {fileID: 0}
+  UseSpriteTint: 0
+  TintColor: {r: 0, g: 0, b: 0, a: 0}
+  EvolutionConditions:
+  - FoodType: 1
+    Evolution: {fileID: 11400000, guid: 6d89338d416e640e7881cf96bf98b1bd, type: 2}
+  - FoodType: 3
+    Evolution: {fileID: 11400000, guid: 7ccd457ab092c447f9ce8cb936c8236a, type: 2}
+  - FoodType: 2
+    Evolution: {fileID: 11400000, guid: 03ee0dd7a46034ae491af0f59a85d779, type: 2}

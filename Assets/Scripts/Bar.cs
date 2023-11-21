@@ -50,8 +50,8 @@ public class Bar : MonoBehaviour
         float halfSize = size / 2;
 
         //round to something pixel perfect so we dont get weird jitter
-        size = Mathf.Round(size/PixelPerfectMinValue)*PixelPerfectMinValue;
-        halfSize = Mathf.Round(halfSize/PixelPerfectMinValue)*PixelPerfectMinValue;
+       // size = Mathf.Round(size/PixelPerfectMinValue)*PixelPerfectMinValue;
+       // halfSize = Mathf.Round(halfSize/PixelPerfectMinValue)*PixelPerfectMinValue;
         
         BarTransform.localScale = new Vector3(size, BarTransform.localScale.y, BarTransform.localScale.z);
         BarTransform.localPosition = new Vector3(halfSize, BarTransform.localPosition.y, BarTransform.localPosition.z);

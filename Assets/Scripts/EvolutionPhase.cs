@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -10,7 +9,7 @@ public class EvolutionPhase : ScriptableObject
    public class EvolutionCondition
    {
       public FoodTypeEvolutionCondition FoodType;
-      private EvolutionPhase Evolution;
+      public EvolutionPhase Evolution;
    }
    
    public enum  FoodTypeEvolutionCondition
@@ -35,6 +34,9 @@ public class EvolutionPhase : ScriptableObject
    [Space]
    public AnimationClip Old;
    public AnimationClip Death;
+
+   public bool UseSpriteTint;
+   public Color TintColor;
 
    [Space]
    public List<EvolutionCondition> EvolutionConditions;

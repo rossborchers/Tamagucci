@@ -302,7 +302,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 58659866239aa43138016caa3e099e55, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  PixelPerfectMinValue: 0.05
+  PixelPerfectMinValue: 0
   MaxWidth: 1.1
   BarTransform: {fileID: 4168074922788005166}
   Text: {fileID: 4157754368906645267}

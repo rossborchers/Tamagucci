@@ -1,9 +1,11 @@
+using DG.Tweening;
 using JetBrains.Annotations;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using PowerTools;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
@@ -14,6 +16,8 @@ public class GameManager : MonoBehaviour
     [Header("Linkz")]
     public SpriteAnim BaseChar;
     public SpriteAnim Hammer;
+
+    private SpriteRenderer _baseCharRenderer;
 
     public GameObject Darkness;
 
@@ -27,6 +31,10 @@ public class GameManager : MonoBehaviour
     public GameObject Environment;
 
     public SelectionMenu MainMenu;
+    public SelectionMenu LightsMenu;
+    public SelectionMenu FoodMenu;
+    
+    public SpriteAnim EvolutionAnimation;
 
     public GameObject TopBar;
 
@@ -54,8 +62,10 @@ public class GameManager : MonoBehaviour
     private EvolutionPhase currentPhase;
     private EvolutionSettings.LifetimeStage _currentStage = EvolutionSettings.LifetimeStage.Egg;
     private EvolutionSettings.LifetimeStage _lastStage = EvolutionSettings.LifetimeStage.None;
+    private EvolutionSettings.LifetimeStage _lastEvolvutionsStage = EvolutionSettings.LifetimeStage.Egg;
     private float _startGameTime;
-    public float GameTime => Time.time - _startGameTime;
+    private float _currentTime;
+    private float GameTime => _currentTime - _startGameTime;
 
     private int _currentHits;
     private bool _hatched;
@@ -84,12 +94,18 @@ public class GameManager : MonoBehaviour
     private bool _sleeping;
 
     private float _lastPoop;
-    
+
+    private void Start()
+    {
+        _baseCharRenderer = BaseChar.GetComponent<SpriteRenderer>();
+    }
+
     public void Update()
     {
         if (_currentStage == EvolutionSettings.LifetimeStage.Egg)
         {
             _startGameTime = Time.time;
+            _currentTime = _startGameTime;
             currentPhase = StartPhase;
             TopBar.SetActive(false);
         }
@@ -97,7 +113,15 @@ public class GameManager : MonoBehaviour
         {
             _hatched = false;
             _currentHits = GeneralSettings.EggHammerHits;
-            TopBar.SetActive(true);
+
+            if (_evolving)
+            {
+                TopBar.SetActive(false);
+            }
+            else
+            {
+                TopBar.SetActive(true);
+            }
         }
         
         bool firstUpdate = _lastStage != _currentStage;
@@ -105,10 +129,15 @@ public class GameManager : MonoBehaviour
         {
             case EvolutionSettings.LifetimeStage.Egg:
                 _startGameTime = Time.time;
+                _currentTime = _startGameTime;
                 if (EggUpdate(firstUpdate))
                 {
                     _lastStage = _currentStage;
                 }
+                break;
+            case EvolutionSettings.LifetimeStage.Senior:
+                SeniorUpdate();
+                _lastStage = _currentStage;
                 break;
             case EvolutionSettings.LifetimeStage.Dead:
                 DeadUpdate();
@@ -130,6 +159,32 @@ public class GameManager : MonoBehaviour
         }
 
         TryMoveToNextStage();
+
+        if (currentPhase != null)
+        {
+            if (currentPhase.UseSpriteTint)
+            {
+                _baseCharRenderer.color = currentPhase.TintColor;
+            }
+            else
+            {
+                _baseCharRenderer.color = Color.white;
+            }
+        }
+
+        if (!_evolving)
+        {
+            _currentTime+=Time.deltaTime;
+
+            if (_sleeping)
+            {
+                LightsMenu.CurrentIndex = 1;
+            }
+            else
+            {
+                LightsMenu.CurrentIndex = 0;
+            }
+        }
     }
    
     private bool EggUpdate(bool firstUpdate)
@@ -155,6 +210,7 @@ public class GameManager : MonoBehaviour
             Darkness.SetActive(false);
             Hammer.gameObject.SetActive(true);
             EndGameEvent.SetActive(false);
+            EvolutionAnimation.gameObject.SetActive(false);
         }
 
         if (_currentHits >= GeneralSettings.EggHammerHits)
@@ -193,10 +249,18 @@ public class GameManager : MonoBehaviour
             BaseChar.Play(GeneralSettings.Death);
         }
     }
+    
+    private void SeniorUpdate()
+    {
+        if (!BaseChar.IsPlaying(currentPhase.Old))
+        {
+            BaseChar.Play(currentPhase.Old);
+        }
+    }
    
     private void GeneralUpdate(EvolutionSettings.LifetimeStage stage, bool firstUpdate)
     {
-        if (!BaseChar.IsPlaying(currentPhase.Eat) && !BaseChar.IsPlaying(currentPhase.Speak))
+        if (!BaseChar.IsPlaying(currentPhase.Eat) && !BaseChar.IsPlaying(currentPhase.Speak) && (currentPhase.Death == null))
         {
             float hungerSatisfaction = (MaxHunger - _hunger)/MaxHunger;
             float sleepSatisfaction = (MaxSleep - _sleepNeeded)/MaxSleep;
@@ -243,6 +307,8 @@ public class GameManager : MonoBehaviour
         CleanRadialFill.SetFloat("_Arc1", (1f-normalizedTime) * 360);
     }
 
+    private Tween evoShake;
+
     private bool IsSad()
     {
         float hungerSatisfaction = (MaxHunger - _hunger)/MaxHunger;
@@ -258,36 +324,161 @@ public class GameManager : MonoBehaviour
         float transitionTime = GeneralSettings.GetStageTransitionTime(_currentStage);
        // CounterText.text = $"{Mathf.FloorToInt(GameTime)}/{transitionTime}";
 
-        _hunger += Time.deltaTime * HungerGrowthSpeed;
+       if (!_evolving)
+       {
+           _hunger += Time.deltaTime * HungerGrowthSpeed;
 
-        if (_sleeping)
-        {
-            _sleepNeeded = Mathf.Max(0, _sleepNeeded - Time.deltaTime * SleepRecoverySpeed);
-        }
-        else
-        {
-            _sleepNeeded += Time.deltaTime * SleepDecaySpeed;
-        }
-       
+           if (_sleeping)
+           {
+               _sleepNeeded = Mathf.Max(0, _sleepNeeded - Time.deltaTime * SleepRecoverySpeed);
+           }
+           else
+           {
+               _sleepNeeded += Time.deltaTime * SleepDecaySpeed;
+           }
+       }
        
         HgrBar.SetValue(_hunger, MaxHunger);
-        EvoBar.SetValue(GameTime, transitionTime);
+
+        float lastEvoTime = GeneralSettings.GetStageTransitionTime(_lastEvolvutionsStage);
+        float evoTime = GeneralSettings.GetStageTransitionTime(_currentStage);
+        float stageTime = evoTime - lastEvoTime;
+        float currentStageTime = GameTime - lastEvoTime;
+        Debug.Log($"{currentStageTime}/{stageTime}, last evo {_lastEvolvutionsStage}: {lastEvoTime}. Current {_currentStage}: {evoTime}");
+        
+        if(currentStageTime >= 0 && stageTime > 0)
+        {
+            var lhs = Mathf.Clamp(currentStageTime, 0, stageTime);
+            var rhs = stageTime;
+            EvoBar.SetValue(lhs, rhs);
+
+            if (lhs / rhs > 0.8f)
+            {
+                if (evoShake == null || !evoShake.IsPlaying())
+                {
+                    evoShake?.Kill();
+                    evoShake = EvoBar.transform.DOShakePosition(20, 0.1f, 10, 90, false, false, ShakeRandomnessMode.Harmonic);
+                }
+            }
+        }
+        
         ClnBar.SetValue(MaxClean - Mathf.Clamp(_activePoop.Count, 0, MaxClean), MaxClean);
         SlpBar.SetValue(MaxSleep-_sleepNeeded, MaxSleep);
 
-       if (GameTime >= transitionTime)
+       if (GameTime >= transitionTime && !_evolving)
         {
-            if (_currentStage == EvolutionSettings.LifetimeStage.Dead 
-                || _currentStage == EvolutionSettings.LifetimeStage.None
-                || _currentStage == EvolutionSettings.LifetimeStage.Egg)
+            
+                if (_currentStage == EvolutionSettings.LifetimeStage.Dead 
+                    || _currentStage == EvolutionSettings.LifetimeStage.None
+                    || _currentStage == EvolutionSettings.LifetimeStage.Egg || _currentStage == EvolutionSettings.LifetimeStage.Senior)
             {
                 //These stages are handled with unique logic
+                Debug.Log($"Returning on custom evolution stage: {_currentStage}");
                 return;
             }
             else
             {
-                _currentStage = (EvolutionSettings.LifetimeStage) ((int)_currentStage) + 1;
+                Debug.Assert(currentPhase.EvolutionConditions.Count > 0);
+                foreach (EvolutionPhase.EvolutionCondition condition in currentPhase.EvolutionConditions)
+                {
+                    if (condition.FoodType == EvolutionPhase.FoodTypeEvolutionCondition.Dead)
+                    {
+                        PlayEvolutionAnimation(() =>
+                        {
+                            _currentStage = EvolutionSettings.LifetimeStage.Senior;
+                        });
+                        break;
+                    }
+                    
+                    if (condition.FoodType == EvolutionPhase.FoodTypeEvolutionCondition.Carnivore && _meatPoints > _vegPoints && _meatPoints > _sweetPoints)
+                    {
+                        //MEAT EVOLUTION
+                        Evolve(condition);
+                        break;
+                    }
+                    if (condition.FoodType == EvolutionPhase.FoodTypeEvolutionCondition.Veg && _vegPoints > _meatPoints && _vegPoints > _sweetPoints)
+                    {
+                        //VEG EVOLUTION
+                        Evolve(condition);
+                        break;
+                    }
+            
+                    if (condition.FoodType == EvolutionPhase.FoodTypeEvolutionCondition.Sweet && _sweetPoints > _meatPoints && _sweetPoints > _vegPoints)
+                    {
+                        //SWEET EVOLUTION
+                        Evolve(condition);
+                        break;
+                    }
+                }
+
+                if (!_evolving)
+                {
+                    //this happens  if you dont feed anything
+                    var randomEvo =currentPhase.EvolutionConditions[Random.Range(0, currentPhase.EvolutionConditions.Count)];
+                    Evolve(randomEvo);
+                }
+                
+                void Evolve(EvolutionPhase.EvolutionCondition condition)
+                {
+                    PlayEvolutionAnimation(() =>
+                    {
+                        _currentStage = (EvolutionSettings.LifetimeStage) ((int)_currentStage) + 1;
+                        currentPhase = condition.Evolution;
+                    });
+                }
             }
+        }
+    }
+
+    private bool _evolving = false;
+    private void PlayEvolutionAnimation(Action evolveCallback)
+    {
+        _evolving = true;
+        StartCoroutine(EvoAnim());
+        IEnumerator EvoAnim()
+        {
+            LightsMenu.Close();
+            FoodMenu.Close();
+            LightsOn();
+            
+            MainMenu.gameObject.SetActive(false);
+           
+            BaseChar.transform.DOShakePosition(2f, 0.025f, 10, 90, false, false, ShakeRandomnessMode.Harmonic);
+            yield return new WaitForSeconds(2f);
+            BaseChar.transform.DOShakePosition(1, 0.05f, 10, 90, false, false, ShakeRandomnessMode.Harmonic);
+            yield return new WaitForSeconds(1f);
+            EvolutionAnimation.gameObject.SetActive(true);
+            EvolutionAnimation.Play(EvolutionAnimation.GetCurrentAnimation());
+
+            yield return new WaitForSeconds(1);
+            
+            _lastEvolvutionsStage = _currentStage;
+            evoShake?.Kill(true);
+            evolveCallback?.Invoke();
+            yield return new WaitForSeconds(1);
+            
+            while (_activePoop.Count > 0)
+            {
+                int idx = _activePoop.Count - 1;
+                Destroy(_activePoop[idx]);
+                _activePoop.RemoveAt(idx);
+            }
+            _lastPoop = Time.time;
+            
+            _hunger = 0;
+            _sleepNeeded = 0;
+            
+            EvolutionAnimation.Stop();
+            EvolutionAnimation.gameObject.SetActive(false);
+          
+            BaseChar.transform.DOShakePosition(0.5f, 0.05f, 10, 90, false, false, ShakeRandomnessMode.Harmonic);
+            yield return new WaitForSeconds(0.5f);
+            BaseChar.transform.DOShakePosition(1, 0.025f, 10, 90, false, false, ShakeRandomnessMode.Harmonic);
+            yield return new WaitForSeconds(1f);
+            _evolving = false;
+            
+            MainMenu.gameObject.SetActive(true);
+            TopBar.SetActive(true);
         }
     }
 
@@ -422,6 +613,7 @@ public class GameManager : MonoBehaviour
 
     public void EndGame()
     {
+        _currentStage = EvolutionSettings.LifetimeStage.Dead;
         ResetCurrentEvent();
         currentEvent = StartCoroutine(EndGameCo());
         IEnumerator EndGameCo()

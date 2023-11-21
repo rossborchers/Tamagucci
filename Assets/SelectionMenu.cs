@@ -21,7 +21,24 @@ public class SelectionMenu : MonoBehaviour
     private float _openTime;
 
     public GameObject Root;
+    public int StartIndex = 0;
 
+    public int CurrentIndex
+    {
+        set
+        {
+            _menuIndex = value;
+            if (_menuIndex < 0)
+            {
+                _menuIndex = 0;
+            }
+            if (_menuIndex > Options.Count - 1)
+            {
+                _menuIndex = Options.Count -1;
+            }
+            DoSelect();
+        }
+    }
     public List<SelectionOption> Options;
 
     private bool _submit;
@@ -29,6 +46,8 @@ public class SelectionMenu : MonoBehaviour
     private bool _right;
     
     private int _menuIndex = 0;
+
+    public bool InvertDir;
 
     private void Start()
     {
@@ -48,7 +67,7 @@ public class SelectionMenu : MonoBehaviour
         {
             return;
         }
-        if (Input.GetKeyDown(KeyCode.LeftArrow))
+        if (Input.GetKeyDown(InvertDir?KeyCode.RightArrow : KeyCode.LeftArrow))
         {
             _menuIndex--;
             if (_menuIndex < 0)
@@ -59,7 +78,7 @@ public class SelectionMenu : MonoBehaviour
             DoSelect();
         }
 
-        if (Input.GetKeyDown(KeyCode.RightArrow))
+        if (Input.GetKeyDown(InvertDir?KeyCode.LeftArrow : KeyCode.RightArrow))
         {
             _menuIndex++;
             if (_menuIndex > Options.Count - 1)
@@ -123,6 +142,7 @@ public class SelectionMenu : MonoBehaviour
     
     public void Open()
     {
+        //_menuIndex = StartIndex;
         open = true;
         _openTime = Time.time;
         Root.SetActive(true);

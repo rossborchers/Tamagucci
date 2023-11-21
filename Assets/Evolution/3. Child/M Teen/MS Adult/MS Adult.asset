@@ -12,11 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b2b5d59e15624498090624c9b4237936, type: 3}
   m_Name: MS Adult
   m_EditorClassIdentifier: 
-  IdleHappy: {fileID: 0}
-  IdleSad: {fileID: 0}
-  IdleVeryHappy: {fileID: 0}
-  IdleVerySad: {fileID: 0}
-  Speak: {fileID: 0}
-  Eat: {fileID: 0}
-  Sleep: {fileID: 0}
-  EvolutionConditions: []
+  IdleHappy: {fileID: 7400000, guid: f8999560510c048ddae2888a06926410, type: 2}
+  IdleSad: {fileID: 7400000, guid: 3d89881a9b27f45bba4ebc7d44bb9f82, type: 2}
+  IdleVeryHappy: {fileID: 7400000, guid: 8eb53c8edd55b441eb204cbf32189dcf, type: 2}
+  IdleVerySad: {fileID: 7400000, guid: 6cf095b1bf8f04f93827ac1c9f77c87e, type: 2}
+  Speak: {fileID: 7400000, guid: 18fbe58849779434f883ee36dc77b8b0, type: 2}
+  Eat: {fileID: 7400000, guid: 34adaa4db80df4e55829c477d0671b91, type: 2}
+  Old: {fileID: 7400000, guid: 212d77b91826140bebb10ea404c5b829, type: 2}
+  Death: {fileID: 7400000, guid: 1eef75136ce4c493289b1d6ac89530a6, type: 2}
+  UseSpriteTint: 0
+  TintColor: {r: 0, g: 0, b: 0, a: 0}
+  EvolutionConditions:
+  - FoodType: 0
+    Evolution: {fileID: 0}

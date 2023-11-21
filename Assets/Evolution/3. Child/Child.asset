@@ -18,4 +18,14 @@ MonoBehaviour:
   IdleVerySad: {fileID: 7400000, guid: 19017c9a34e984920805f9b741cd7c16, type: 2}
   Speak: {fileID: 7400000, guid: f3daf763aa0a246879fbad25bf5b463a, type: 2}
   Eat: {fileID: 7400000, guid: 8942cd0c2727e445bb02e3c8b7be82b0, type: 2}
-  EvolutionConditions: []
+  Old: {fileID: 0}
+  Death: {fileID: 0}
+  UseSpriteTint: 0
+  TintColor: {r: 0, g: 0, b: 0, a: 0}
+  EvolutionConditions:
+  - FoodType: 1
+    Evolution: {fileID: 11400000, guid: 09edc1cc6469e4d72888297bf99b7994, type: 2}
+  - FoodType: 3
+    Evolution: {fileID: 11400000, guid: afd7f103cef1d4809a2f9aba384b4a08, type: 2}
+  - FoodType: 2
+    Evolution: {fileID: 11400000, guid: c9186f2ce517846a6af28f661a93ee61, type: 2}
