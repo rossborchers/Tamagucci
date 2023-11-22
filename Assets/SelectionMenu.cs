@@ -95,6 +95,8 @@ public class SelectionMenu : MonoBehaviour
         }
     }
 
+    private int _lastSelected;
+    
     private void DoSelect()
     {
         for (var i = 0; i < Options.Count; i++)
@@ -102,6 +104,12 @@ public class SelectionMenu : MonoBehaviour
             Unselect(Options[i]);
             if (i == _menuIndex)
             {
+                if (_lastSelected != i)
+                {
+                    GameManager.Instance.SFXHighlight.Play();
+                    _lastSelected = i;
+                }
+
                 Select(Options[i]);
             }
         }
@@ -130,6 +138,7 @@ public class SelectionMenu : MonoBehaviour
             option.OnSubmitMenu.Open();
         }
 
+        GameManager.Instance.SFXSelect.Play();
         option.OnSubmitAction.Invoke();
             
         if (option.CloseOnSubmit)

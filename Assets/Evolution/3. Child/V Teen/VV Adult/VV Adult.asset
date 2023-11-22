@@ -21,7 +21,7 @@ MonoBehaviour:
   Old: {fileID: 7400000, guid: 1f4db72f1d8f14426bc40201cbf52089, type: 2}
   Death: {fileID: 7400000, guid: 536da01fdd57b4c2085a2ab04b8d1a4f, type: 2}
   UseSpriteTint: 0
-  TintColor: {r: 0, g: 0, b: 0, a: 0}
+  TintColor: {r: 1, g: 0.010321472, b: 0, a: 1}
   EvolutionConditions:
   - FoodType: 0
     Evolution: {fileID: 0}

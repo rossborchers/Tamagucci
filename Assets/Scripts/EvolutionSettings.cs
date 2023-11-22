@@ -17,6 +17,8 @@ public class EvolutionSettings : ScriptableObject
       Dead = 6
    }
 
+   [Space]
+
    public int EggHammerHits = 4;
    public float PoopsPerSecond = 0.5f;
    

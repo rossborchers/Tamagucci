@@ -13,6 +13,17 @@ using Random = UnityEngine.Random;
 
 public class GameManager : MonoBehaviour
 {
+    public AudioSource SFXEatingBig;
+    public AudioSource SFXEatingSmall;
+    public AudioSource SFXEvolve;
+    public AudioSource SFXDeath;
+    public AudioSource SFXHatch;
+    public AudioSource SFXSelect;
+    public AudioSource SFXHighlight;
+
+    public static GameManager Instance;
+    
+    
     [Header("Linkz")]
     public SpriteAnim BaseChar;
     public SpriteAnim Hammer;
@@ -95,6 +106,11 @@ public class GameManager : MonoBehaviour
 
     private float _lastPoop;
 
+    private void Awake()
+    {
+        Instance = this;
+    }
+
     private void Start()
     {
         _baseCharRenderer = BaseChar.GetComponent<SpriteRenderer>();
@@ -174,7 +190,14 @@ public class GameManager : MonoBehaviour
 
         if (!_evolving)
         {
-            _currentTime+=Time.deltaTime;
+            if (Input.GetKey(KeyCode.UpArrow))
+            {
+                _currentTime+=Time.deltaTime * 15;
+            }
+            else
+            {
+                _currentTime+=Time.deltaTime;
+            }
 
             if (_sleeping)
             {
@@ -217,12 +240,14 @@ public class GameManager : MonoBehaviour
         {
             _hatched = true;
             Hammer.gameObject.SetActive(false);
+            Instance.SFXHatch.Play();
             BaseChar.Play(GeneralSettings.EggHatch);
             
         }
 
         if (Input.GetKeyDown(KeyCode.Space))
         {
+            GameManager.Instance.SFXHighlight.Play();
             _currentHits++;
             if (!Hammer.IsPlaying(GeneralSettings.HammerHit))
             {
@@ -241,20 +266,43 @@ public class GameManager : MonoBehaviour
 
         return true;
     }
-    
+
+    private Coroutine _endGameCoroutine;
     private void DeadUpdate()
     {
         if (!BaseChar.IsPlaying(GeneralSettings.Death))
         {
             BaseChar.Play(GeneralSettings.Death);
+
+            if (_endGameCoroutine == null)
+            {
+                _endGameCoroutine = StartCoroutine(EndGameAfter(3f));
+            }
+        }
+
+        IEnumerator EndGameAfter(float time)
+        {
+            yield return new WaitForSeconds(time);
+            EndGame(); 
+            _endGameCoroutine = null;
         }
     }
     
     private void SeniorUpdate()
     {
-        if (!BaseChar.IsPlaying(currentPhase.Old))
+        if (_dying)
         {
-            BaseChar.Play(currentPhase.Old);
+            if (!BaseChar.IsPlaying(currentPhase.Death))
+            {
+                BaseChar.Play(currentPhase.Death);
+            }
+        }
+        else
+        {
+            if (!BaseChar.IsPlaying(currentPhase.Old))
+            {
+                BaseChar.Play(currentPhase.Old);
+            }
         }
     }
    
@@ -319,6 +367,8 @@ public class GameManager : MonoBehaviour
             && cleanSatisfaction < NormalizedNormalSatisfactionLevel;
     }
 
+    private bool _dying;
+
     private void TryMoveToNextStage()
     {
         float transitionTime = GeneralSettings.GetStageTransitionTime(_currentStage);
@@ -370,12 +420,20 @@ public class GameManager : MonoBehaviour
             
                 if (_currentStage == EvolutionSettings.LifetimeStage.Dead 
                     || _currentStage == EvolutionSettings.LifetimeStage.None
-                    || _currentStage == EvolutionSettings.LifetimeStage.Egg || _currentStage == EvolutionSettings.LifetimeStage.Senior)
+                    || _currentStage == EvolutionSettings.LifetimeStage.Egg )
             {
                 //These stages are handled with unique logic
                 Debug.Log($"Returning on custom evolution stage: {_currentStage}");
                 return;
             }
+            else if ( _currentStage == EvolutionSettings.LifetimeStage.Senior)
+                {
+                    if (!_dying)
+                    {
+                        _dying = true;
+                        StartCoroutine(Die());
+                    }
+                }
             else
             {
                 Debug.Assert(currentPhase.EvolutionConditions.Count > 0);
@@ -431,6 +489,24 @@ public class GameManager : MonoBehaviour
     }
 
     private bool _evolving = false;
+
+    private IEnumerator Die()
+    {
+        LightsMenu.Close();
+        FoodMenu.Close();
+        LightsOn();
+        MainMenu.gameObject.SetActive(false);
+            
+        MainMenu.gameObject.SetActive(false);
+        
+        Instance.SFXDeath.Play();
+        yield return new WaitForSeconds(1f);
+        BaseChar.Play(currentPhase.Death);
+
+        yield return new WaitForSeconds(3f);
+        _currentStage = EvolutionSettings.LifetimeStage.Dead;
+        _dying = false;
+    }
     private void PlayEvolutionAnimation(Action evolveCallback)
     {
         _evolving = true;
@@ -445,6 +521,7 @@ public class GameManager : MonoBehaviour
            
             BaseChar.transform.DOShakePosition(2f, 0.025f, 10, 90, false, false, ShakeRandomnessMode.Harmonic);
             yield return new WaitForSeconds(2f);
+            Instance.SFXEvolve.Play();
             BaseChar.transform.DOShakePosition(1, 0.05f, 10, 90, false, false, ShakeRandomnessMode.Harmonic);
             yield return new WaitForSeconds(1f);
             EvolutionAnimation.gameObject.SetActive(true);
@@ -547,6 +624,7 @@ public class GameManager : MonoBehaviour
     [UsedImplicitly]
     public void FeedVeg()
     {
+        Instance.SFXEatingBig.Play();
         _hunger = Mathf.Max(0, _hunger-HungerEatReduction);
         _vegPoints++;
         EnviromentMenuSlideOff();
@@ -556,6 +634,7 @@ public class GameManager : MonoBehaviour
     [UsedImplicitly]
     public void FeedMeat()
     {
+        Instance.SFXEatingBig.Play();
         _hunger = Mathf.Max(0, _hunger-HungerEatReduction);
         _meatPoints++;
         EnviromentMenuSlideOff();
@@ -565,6 +644,7 @@ public class GameManager : MonoBehaviour
     [UsedImplicitly]
     public void FeedSweet()
     {
+        Instance.SFXEatingBig.Play();
         _hunger = Mathf.Max(0, _hunger-HungerEatReduction);
         _sweetPoints++;
         EnviromentMenuSlideOff();
