@@ -1245,7 +1245,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5287436818987738762, guid: e67b0d5f384b644b0abcdf9cf0f691fc, type: 3}
       propertyPath: InvertMaxMin
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5287436818987738762, guid: e67b0d5f384b644b0abcdf9cf0f691fc, type: 3}
       propertyPath: MaxThreshold
@@ -1819,10 +1819,10 @@ Camera:
   m_LensShift: {x: 0, y: 0}
   m_NormalizedViewPortRect:
     serializedVersion: 2
-    x: 0.22656251
-    y: 0.013888889
-    width: 0.546875
-    height: 0.9722222
+    x: 0.038541667
+    y: 0.024074074
+    width: 0.4010417
+    height: 0.7129629
   near clip plane: 0.3
   far clip plane: 1000
   field of view: 34
@@ -2596,6 +2596,64 @@ SortingGroup:
   m_SortingLayer: 0
   m_SortingOrder: -3
   m_SortAtRoot: 0
+--- !u!1 &864969819
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 864969821}
+  - component: {fileID: 864969820}
+  - component: {fileID: 864969822}
+  m_Layer: 0
+  m_Name: Aurdino
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &864969820
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 864969819}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a0fa1a52baa2d475d95a664854921d67, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!4 &864969821
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 864969819}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 3
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &864969822
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 864969819}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 81b158bfa796340d894f01b7d094926d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Ardino: {fileID: 864969820}
 --- !u!1 &893418790
 GameObject:
   m_ObjectHideFlags: 0
@@ -5653,6 +5711,18 @@ PrefabInstance:
       value: EVO
       objectReference: {fileID: 0}
     - target: {fileID: 5287436818987738762, guid: e67b0d5f384b644b0abcdf9cf0f691fc, type: 3}
+      propertyPath: MaxColor.b
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5287436818987738762, guid: e67b0d5f384b644b0abcdf9cf0f691fc, type: 3}
+      propertyPath: MaxColor.g
+      value: 0.4669811
+      objectReference: {fileID: 0}
+    - target: {fileID: 5287436818987738762, guid: e67b0d5f384b644b0abcdf9cf0f691fc, type: 3}
+      propertyPath: MaxColor.r
+      value: 0.9442142
+      objectReference: {fileID: 0}
+    - target: {fileID: 5287436818987738762, guid: e67b0d5f384b644b0abcdf9cf0f691fc, type: 3}
       propertyPath: MinColor.b
       value: 0.9622642
       objectReference: {fileID: 0}
@@ -5665,8 +5735,12 @@ PrefabInstance:
       value: 0.34950158
       objectReference: {fileID: 0}
     - target: {fileID: 5287436818987738762, guid: e67b0d5f384b644b0abcdf9cf0f691fc, type: 3}
+      propertyPath: InvertMaxMin
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5287436818987738762, guid: e67b0d5f384b644b0abcdf9cf0f691fc, type: 3}
       propertyPath: MaxThreshold
-      value: -1
+      value: 20
       objectReference: {fileID: 0}
     - target: {fileID: 5287436818987738762, guid: e67b0d5f384b644b0abcdf9cf0f691fc, type: 3}
       propertyPath: MinThreshold

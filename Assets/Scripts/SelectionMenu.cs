@@ -67,7 +67,8 @@ public class SelectionMenu : MonoBehaviour
         {
             return;
         }
-        if (Input.GetKeyDown(InvertDir?KeyCode.RightArrow : KeyCode.LeftArrow))
+        bool subtractIdxDown = InvertDir ? InputProxy.Instance.RightDown : InputProxy.Instance.LeftDown;
+        if (subtractIdxDown)
         {
             _menuIndex--;
             if (_menuIndex < 0)
@@ -78,7 +79,8 @@ public class SelectionMenu : MonoBehaviour
             DoSelect();
         }
 
-        if (Input.GetKeyDown(InvertDir?KeyCode.LeftArrow : KeyCode.RightArrow))
+        bool addIdxDown = InvertDir ? InputProxy.Instance.LeftDown : InputProxy.Instance.RightDown;
+        if (addIdxDown)
         {
             _menuIndex++;
             if (_menuIndex > Options.Count - 1)
@@ -89,7 +91,7 @@ public class SelectionMenu : MonoBehaviour
             DoSelect();
         }
 
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (InputProxy.Instance.SubmitDown)
         {
             Submit(Options[_menuIndex]);
         }

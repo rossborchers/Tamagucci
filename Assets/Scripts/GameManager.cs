@@ -22,8 +22,7 @@ public class GameManager : MonoBehaviour
     public AudioSource SFXHighlight;
 
     public static GameManager Instance;
-    
-    
+
     [Header("Linkz")]
     public SpriteAnim BaseChar;
     public SpriteAnim Hammer;
@@ -61,7 +60,6 @@ public class GameManager : MonoBehaviour
 
     public GameObject GrimReaperEvent;
     public GameObject EndGameEvent;
-
 
     public Material CleanRadialFill;
     public float CleanCooldown;
@@ -144,6 +142,10 @@ public class GameManager : MonoBehaviour
         switch (_currentStage)
         {
             case EvolutionSettings.LifetimeStage.Egg:
+                if (firstUpdate)
+                {
+                    Aurdino.Instance.UpdateState(Aurdino.GameState.Egg);
+                }
                 _startGameTime = Time.time;
                 _currentTime = _startGameTime;
                 if (EggUpdate(firstUpdate))
@@ -160,6 +162,7 @@ public class GameManager : MonoBehaviour
                 _lastStage = _currentStage;
                 break;
             default:
+                
                 GeneralUpdate(_currentStage, firstUpdate);
                 if (Time.time - _lastPoop > 1f / GeneralSettings.PoopsPerSecond)
                 {
@@ -245,7 +248,7 @@ public class GameManager : MonoBehaviour
             
         }
 
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (InputProxy.Instance.SubmitDown)
         {
             GameManager.Instance.SFXHighlight.Play();
             _currentHits++;
@@ -263,6 +266,8 @@ public class GameManager : MonoBehaviour
                 BaseChar.Play(GeneralSettings.EggIdle);
             }
         }
+        
+        Aurdino.Instance.UpdateState(Aurdino.GameState.Egg);
 
         return true;
     }
@@ -353,6 +358,11 @@ public class GameManager : MonoBehaviour
         //Clean cooldown
         float normalizedTime = Mathf.Clamp01((Time.time - _lastCleanTime) / CleanCooldown);
         CleanRadialFill.SetFloat("_Arc1", (1f-normalizedTime) * 360);
+        
+        if (InputProxy.Instance.ResetDown)
+        {
+            SceneManager.LoadScene(0);
+        }
     }
 
     private Tween evoShake;
@@ -388,19 +398,23 @@ public class GameManager : MonoBehaviour
            }
        }
        
-        HgrBar.SetValue(_hunger, MaxHunger);
+        HgrBar.SetValue(Mathf.Max(0, MaxHunger-_hunger), MaxHunger);
 
         float lastEvoTime = GeneralSettings.GetStageTransitionTime(_lastEvolvutionsStage);
         float evoTime = GeneralSettings.GetStageTransitionTime(_currentStage);
         float stageTime = evoTime - lastEvoTime;
         float currentStageTime = GameTime - lastEvoTime;
-        Debug.Log($"{currentStageTime}/{stageTime}, last evo {_lastEvolvutionsStage}: {lastEvoTime}. Current {_currentStage}: {evoTime}");
         
+        //Debug.Log($"{currentStageTime}/{stageTime}, last evo {_lastEvolvutionsStage}: {lastEvoTime}. Current {_currentStage}: {evoTime}");
+
         if(currentStageTime >= 0 && stageTime > 0)
         {
-            var lhs = Mathf.Clamp(currentStageTime, 0, stageTime);
+            float stageTimeClamped = Mathf.Clamp(currentStageTime, 0, stageTime);
+            var lhs = stageTimeClamped;
             var rhs = stageTime;
-            EvoBar.SetValue(lhs, rhs);
+            EvoBar.SetValue(Mathf.Max(rhs-lhs), rhs);
+            
+            Aurdino.Instance.UpdateTimerState(stageTimeClamped/stageTime);
 
             if (lhs / rhs > 0.8f)
             {
@@ -417,13 +431,12 @@ public class GameManager : MonoBehaviour
 
        if (GameTime >= transitionTime && !_evolving)
         {
-            
-                if (_currentStage == EvolutionSettings.LifetimeStage.Dead 
-                    || _currentStage == EvolutionSettings.LifetimeStage.None
-                    || _currentStage == EvolutionSettings.LifetimeStage.Egg )
+            if (_currentStage == EvolutionSettings.LifetimeStage.Dead 
+                || _currentStage == EvolutionSettings.LifetimeStage.None
+                || _currentStage == EvolutionSettings.LifetimeStage.Egg )
             {
                 //These stages are handled with unique logic
-                Debug.Log($"Returning on custom evolution stage: {_currentStage}");
+               // Debug.Log($"Returning on custom evolution stage: {_currentStage}");
                 return;
             }
             else if ( _currentStage == EvolutionSettings.LifetimeStage.Senior)
@@ -496,8 +509,8 @@ public class GameManager : MonoBehaviour
         FoodMenu.Close();
         LightsOn();
         MainMenu.gameObject.SetActive(false);
-            
-        MainMenu.gameObject.SetActive(false);
+
+        Aurdino.Instance.UpdateState(Aurdino.GameState.Dead);
         
         Instance.SFXDeath.Play();
         yield return new WaitForSeconds(1f);
@@ -519,8 +532,10 @@ public class GameManager : MonoBehaviour
             
             MainMenu.gameObject.SetActive(false);
            
+            Aurdino.Instance.UpdateState(Aurdino.GameState.Evolving);
+            
             BaseChar.transform.DOShakePosition(2f, 0.025f, 10, 90, false, false, ShakeRandomnessMode.Harmonic);
-            yield return new WaitForSeconds(2f);
+            yield return new WaitForSeconds(1f);
             Instance.SFXEvolve.Play();
             BaseChar.transform.DOShakePosition(1, 0.05f, 10, 90, false, false, ShakeRandomnessMode.Harmonic);
             yield return new WaitForSeconds(1f);
@@ -553,6 +568,7 @@ public class GameManager : MonoBehaviour
             BaseChar.transform.DOShakePosition(1, 0.025f, 10, 90, false, false, ShakeRandomnessMode.Harmonic);
             yield return new WaitForSeconds(1f);
             _evolving = false;
+            Aurdino.Instance.UpdateState(Aurdino.GameState.AwakeTimer);
             
             MainMenu.gameObject.SetActive(true);
             TopBar.SetActive(true);
@@ -591,6 +607,7 @@ public class GameManager : MonoBehaviour
     [UsedImplicitly]
     public void LightsOn()
     {
+        Aurdino.Instance.UpdateState(Aurdino.GameState.AwakeTimer);
         ResetCurrentEvent();
         _sleeping = false;
         Darkness.SetActive(false);
@@ -614,6 +631,7 @@ public class GameManager : MonoBehaviour
     [UsedImplicitly]
     public void LightsOff()
     {
+        Aurdino.Instance.UpdateState(Aurdino.GameState.SleepTimer);
         _sleeping = true;
         Darkness.SetActive(true);
         ResetCurrentEvent();

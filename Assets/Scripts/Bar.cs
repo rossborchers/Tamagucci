@@ -46,7 +46,7 @@ public class Bar : MonoBehaviour
         }
         
         float norm = Mathf.Clamp01(value / max);
-        float size = norm * MaxWidth;
+        float  size = norm * MaxWidth;
         float halfSize = size / 2;
 
         //round to something pixel perfect so we dont get weird jitter
