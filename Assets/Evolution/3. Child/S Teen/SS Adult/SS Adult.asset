@@ -20,7 +20,7 @@ MonoBehaviour:
   Eat: {fileID: 7400000, guid: 572e3d5b768704bc3be15b08388c2e98, type: 2}
   Old: {fileID: 7400000, guid: 9b086957be664447792f76de83e69554, type: 2}
   Death: {fileID: 7400000, guid: 962f8ed17fc2a498280a2cbcb26222e6, type: 2}
-  UseSpriteTint: 1
+  UseSpriteTint: 0
   TintColor: {r: 1, g: 0, b: 0.7879014, a: 1}
   EvolutionConditions:
   - FoodType: 0

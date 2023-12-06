@@ -542,6 +542,7 @@ public class GameManager : MonoBehaviour
         LightsMenu.Close();
         FoodMenu.Close();
         LightsOn(false);
+        MainMenu.Close();
         MainMenu.gameObject.SetActive(false);
 
         Aurdino.Instance.UpdateState(Aurdino.GameState.Dead);
@@ -564,6 +565,7 @@ public class GameManager : MonoBehaviour
             FoodMenu.Close();
             LightsOn(false);
             
+            MainMenu.Close();
             MainMenu.gameObject.SetActive(false);
            
             Aurdino.Instance.UpdateState(Aurdino.GameState.Evolving);
@@ -606,6 +608,7 @@ public class GameManager : MonoBehaviour
             UpdateStateTime();
 
             MainMenu.gameObject.SetActive(true);
+            MainMenu.Open();
             TopBar.SetActive(true);
         }
     }
@@ -754,6 +757,7 @@ public class GameManager : MonoBehaviour
         currentEvent = StartCoroutine(EndGameCo());
         IEnumerator EndGameCo()
         {
+            MainMenu.Close();
             MainMenu.gameObject.SetActive(false);
             TopBar.SetActive(false);
             GrimReaperEvent.gameObject.SetActive(false);
