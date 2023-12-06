@@ -230,7 +230,6 @@ public class Aurdino : MonoBehaviour
                     break;
                 case ButtonPress.Reset:
                     OnButtonPressed?.Invoke(ButtonPress.Reset);
-
                     break;
                 default:
                     break;
