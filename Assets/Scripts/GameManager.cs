@@ -116,6 +116,27 @@ public class GameManager : MonoBehaviour
 
     public void Update()
     {
+        if (Input.GetKeyDown(KeyCode.F1))
+        {
+            Aurdino.Instance.UpdateState(Aurdino.GameState.Egg);
+        }
+        if (Input.GetKeyDown(KeyCode.F2))
+        {
+            Aurdino.Instance.UpdateState(Aurdino.GameState.Evolving);
+        }
+        if (Input.GetKeyDown(KeyCode.F3))
+        {
+            Aurdino.Instance.UpdateState(Aurdino.GameState.AwakeTimer);
+        }
+        if (Input.GetKeyDown(KeyCode.F4))
+        {
+            Aurdino.Instance.UpdateState(Aurdino.GameState.SleepTimer);
+        }
+        if (Input.GetKeyDown(KeyCode.F5))
+        {
+            Aurdino.Instance.UpdateState(Aurdino.GameState.Dead);
+        }
+        
         if (_currentStage == EvolutionSettings.LifetimeStage.Egg)
         {
             _startGameTime = Time.time;
@@ -144,7 +165,6 @@ public class GameManager : MonoBehaviour
             case EvolutionSettings.LifetimeStage.Egg:
                 if (firstUpdate)
                 {
-                    Aurdino.Instance.UpdateState(Aurdino.GameState.Egg);
                 }
                 _startGameTime = Time.time;
                 _currentTime = _startGameTime;
@@ -220,6 +240,7 @@ public class GameManager : MonoBehaviour
             if (!BaseChar.IsPlaying(GeneralSettings.EggHatch))
             {
                 _currentStage = EvolutionSettings.LifetimeStage.Baby;
+                UpdateStateTime();
                 _lastPoop = Time.time;
                 MainMenu.Open();
                 return false;
@@ -237,6 +258,14 @@ public class GameManager : MonoBehaviour
             Hammer.gameObject.SetActive(true);
             EndGameEvent.SetActive(false);
             EvolutionAnimation.gameObject.SetActive(false);
+
+            StartCoroutine(DelaySend());
+            IEnumerator DelaySend()
+            {
+                yield return new WaitForSeconds(1);
+                Aurdino.Instance.UpdateState(Aurdino.GameState.Egg);
+            }
+           
         }
 
         if (_currentHits >= GeneralSettings.EggHammerHits)
@@ -266,8 +295,6 @@ public class GameManager : MonoBehaviour
                 BaseChar.Play(GeneralSettings.EggIdle);
             }
         }
-        
-        Aurdino.Instance.UpdateState(Aurdino.GameState.Egg);
 
         return true;
     }
@@ -413,9 +440,8 @@ public class GameManager : MonoBehaviour
             var lhs = stageTimeClamped;
             var rhs = stageTime;
             EvoBar.SetValue(Mathf.Max(rhs-lhs), rhs);
-            
-            Aurdino.Instance.UpdateTimerState(stageTimeClamped/stageTime);
 
+          
             if (lhs / rhs > 0.8f)
             {
                 if (evoShake == null || !evoShake.IsPlaying())
@@ -503,11 +529,19 @@ public class GameManager : MonoBehaviour
 
     private bool _evolving = false;
 
+    private void UpdateStateTime()
+    {
+        float lastEvoTime = GeneralSettings.GetStageTransitionTime(_lastEvolvutionsStage);
+        float evoTime = GeneralSettings.GetStageTransitionTime(_currentStage);
+        float stageTime = evoTime - lastEvoTime;
+        Aurdino.Instance.UpdateTimerState(Mathf.CeilToInt(stageTime));
+    }
+
     private IEnumerator Die()
     {
         LightsMenu.Close();
         FoodMenu.Close();
-        LightsOn();
+        LightsOn(false);
         MainMenu.gameObject.SetActive(false);
 
         Aurdino.Instance.UpdateState(Aurdino.GameState.Dead);
@@ -528,7 +562,7 @@ public class GameManager : MonoBehaviour
         {
             LightsMenu.Close();
             FoodMenu.Close();
-            LightsOn();
+            LightsOn(false);
             
             MainMenu.gameObject.SetActive(false);
            
@@ -568,8 +602,9 @@ public class GameManager : MonoBehaviour
             BaseChar.transform.DOShakePosition(1, 0.025f, 10, 90, false, false, ShakeRandomnessMode.Harmonic);
             yield return new WaitForSeconds(1f);
             _evolving = false;
-            Aurdino.Instance.UpdateState(Aurdino.GameState.AwakeTimer);
-            
+
+            UpdateStateTime();
+
             MainMenu.gameObject.SetActive(true);
             TopBar.SetActive(true);
         }
@@ -605,9 +640,12 @@ public class GameManager : MonoBehaviour
     }
 
     [UsedImplicitly]
-    public void LightsOn()
+    public void LightsOn( bool updateArdinoState = true)
     {
-        Aurdino.Instance.UpdateState(Aurdino.GameState.AwakeTimer);
+        if (updateArdinoState)
+        {
+            Aurdino.Instance.UpdateState(Aurdino.GameState.AwakeTimer);
+        }
         ResetCurrentEvent();
         _sleeping = false;
         Darkness.SetActive(false);

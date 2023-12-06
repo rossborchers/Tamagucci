@@ -10,7 +10,7 @@ using UnityEngine.Serialization;
 public class Aurdino : MonoBehaviour
 {
     public static Aurdino Instance;
-    
+
     public enum GameState
     {
         Egg = 1,
@@ -29,13 +29,13 @@ public class Aurdino : MonoBehaviour
         Reset = 3
     }
 
-    public event Action<ButtonPress> OnButtonPressed = delegate {  };
+    public event Action<ButtonPress> OnButtonPressed = delegate { };
 
     [Serializable]
     class SerialSettings
     {
         public string PortName = "COM3";
-        public int BaudRate = 9600;
+        public int BaudRate = 28800;
     }
 
     private SerialSettings _settings;
@@ -43,12 +43,12 @@ public class Aurdino : MonoBehaviour
     private SerialPort _serialPort;
 
     private bool _gameStateDirty = false;
-    private GameState _currentGameState;
+    private GameState _currentGameState = GameState.Dead;
     private GameState _sentState;
 
     private bool _timerStateDirty = false;
-    private float _normalizedTimer;
-    
+    private int _totalTime;
+
     private Thread _serialThread;
     private object _mutex;
 
@@ -56,8 +56,17 @@ public class Aurdino : MonoBehaviour
 
     private string _lastWrittenValue;
 
+    private float _lastSendTime;
+
     public void UpdateState(GameState state)
     {
+         if (_sentState == state)
+         {
+             return;
+         }
+         
+         _lastSendTime = Time.time;
+
         lock (_mutex)
         {
             Debug.Log($"Updating state: {state}");
@@ -65,17 +74,16 @@ public class Aurdino : MonoBehaviour
             _gameStateDirty = true;
         }
     }
-    
-    public void UpdateTimerState(float normalizedTime)
+
+    public void UpdateTimerState(int totalTime)
     {
         lock (_mutex)
         {
-            _normalizedTimer = Mathf.Clamp01(normalizedTime);
+            _totalTime = totalTime;
             _timerStateDirty = true;
         }
     }
 
-    
     private void Awake()
     {
         Instance = this;
@@ -86,7 +94,7 @@ public class Aurdino : MonoBehaviour
         {
             Directory.CreateDirectory(Application.streamingAssetsPath);
         }
-        
+
         if (File.Exists(path))
         {
             string json = File.ReadAllText(path);
@@ -104,14 +112,15 @@ public class Aurdino : MonoBehaviour
     {
         _mutex = new object();
         _serialPort = new SerialPort(_settings.PortName, _settings.BaudRate);
-        try 
+
+        try
         {
             _serialPort.Open();
             _isRunning = true;
             _serialThread = new Thread(SerialThread);
             _serialThread.Start();
-            
-        } catch (System.Exception e) 
+        }
+        catch (System.Exception e)
         {
             Debug.LogError($"Error opening serial port and starting thread: {e}");
         }
@@ -123,10 +132,9 @@ public class Aurdino : MonoBehaviour
     void SerialThread()
     {
         bool running;
+
         do
         {
-            Thread.Sleep(10);
-            
             bool isOpen;
 
             lock (_mutex)
@@ -156,28 +164,39 @@ public class Aurdino : MonoBehaviour
                         {
                             _threadError = e.ToString();
                         }
-
                     }
                 }
-                
+                bool mustChange = false;
+                bool timerDirty = false;
+
                 lock (_mutex)
                 {
-                    if (_gameStateDirty)
+                    mustChange = _gameStateDirty;
+                    timerDirty = _timerStateDirty;
+                }
+
+                if (mustChange)
+                {
+                    lock (_mutex)
                     {
                         _gameStateDirty = false;
-                        _serialPort.WriteLine($"{(int)_currentGameState}");
+                        _serialPort.Write($"{(int)_currentGameState}");
                         _sentState = _currentGameState;
                         _lastWrittenValue = $"{_currentGameState} (state) : {(int)_currentGameState}";
                     }
-                    else if (_timerStateDirty)
+                }
+                else if (timerDirty)
+                {
+                    lock (_mutex)
                     {
                         _timerStateDirty = false;
-                        int timeRescaled = (int)((_normalizedTimer * 100f) + 10);
-                        _serialPort.WriteLine($"{timeRescaled}");
-                        _lastWrittenValue = $"{timeRescaled} (time)";
+                        _serialPort.Write($"{_totalTime}");
+                        _lastWrittenValue = $"{_totalTime} (time)";
                     }
                 }
             }
+            
+            Thread.Sleep(10);
 
             lock (_mutex)
             {
@@ -186,7 +205,7 @@ public class Aurdino : MonoBehaviour
         } while (running);
     }
 
-    void Update() 
+    void Update()
     {
         lock (_mutex)
         {
@@ -194,6 +213,7 @@ public class Aurdino : MonoBehaviour
             {
                 return;
             }
+
             switch (_recievedButtonPress)
             {
                 case ButtonPress.Left:
@@ -210,6 +230,7 @@ public class Aurdino : MonoBehaviour
                     break;
                 case ButtonPress.Reset:
                     OnButtonPressed?.Invoke(ButtonPress.Reset);
+
                     break;
                 default:
                     break;
@@ -221,10 +242,10 @@ public class Aurdino : MonoBehaviour
                 Debug.LogError(_threadError);
                 _threadError = String.Empty;
             }
-            
+
             if (!string.IsNullOrEmpty(_lastWrittenValue))
             {
-                Debug.Log($"Wrote: {_lastWrittenValue}");
+                //Debug.Log($"Wrote: {_lastWrittenValue}");
                 _lastWrittenValue = String.Empty;
             }
         }
@@ -234,10 +255,12 @@ public class Aurdino : MonoBehaviour
     {
         GameState sentState;
         bool open;
+
         do
         {
             UpdateState(GameState.Dead);
             Thread.Sleep(10);
+
             lock (_mutex)
             {
                 open = _serialPort.IsOpen;
@@ -249,10 +272,10 @@ public class Aurdino : MonoBehaviour
         {
             _isRunning = false;
         }
-        
+
         Thread.Sleep(10);
         _serialThread?.Abort();
-      
+
         if (_serialPort != null && _serialPort.IsOpen)
         {
             _serialPort.Close();
