@@ -10,6 +10,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
+using Sequence = DG.Tweening.Sequence;
 
 public class GameManager : MonoBehaviour
 {
@@ -25,7 +26,17 @@ public class GameManager : MonoBehaviour
 
     [Header("Linkz")]
     public SpriteAnim BaseChar;
+    public SpriteAnim EggChar;
     public SpriteAnim Hammer;
+
+
+    public SpriteAnim SweetFoodEat;
+    public SpriteAnim MeatFoodEat;
+    public SpriteAnim VegFoodEat;
+    
+    public SpriteAnim Meteor;
+
+    public GameObject EggBackground;
 
     private SpriteRenderer _baseCharRenderer;
 
@@ -56,6 +67,10 @@ public class GameManager : MonoBehaviour
     public SpriteAnim Hearts;
     public SpriteAnim Zzz;
     
+    public GameObject Title;
+    public SpriteAnim TitleSparkle;
+    public SpriteAnim TitleFade;
+    
     public Animator EnvironmentMenuController;
 
     public GameObject GrimReaperEvent;
@@ -66,6 +81,8 @@ public class GameManager : MonoBehaviour
 
     public float HeartDelayAfterEating = 2f;
     public float ZzzDelayAfterDarkness = 0.5f;
+
+    private float _lastHammerHitTime;
     
     //runtime game state
     private EvolutionPhase currentPhase;
@@ -112,6 +129,9 @@ public class GameManager : MonoBehaviour
     private void Start()
     {
         _baseCharRenderer = BaseChar.GetComponent<SpriteRenderer>();
+        MeatFoodEat.gameObject.SetActive(false);
+        SweetFoodEat.gameObject.SetActive(false);
+        VegFoodEat.gameObject.SetActive(false);
     }
 
     public void Update()
@@ -165,6 +185,14 @@ public class GameManager : MonoBehaviour
             case EvolutionSettings.LifetimeStage.Egg:
                 if (firstUpdate)
                 {
+                    EggBackground.SetActive(true);
+                    TitleFade.gameObject.SetActive(false);
+                    Title.SetActive(true);
+                    TitleSparkle.gameObject.SetActive(true);
+                    TitleSparkle.Play(TitleSparkle.Clip);
+                    EggChar.gameObject.SetActive(true);
+                    BaseChar.gameObject.SetActive(false);
+                    Meteor.gameObject.SetActive(false);
                 }
                 _startGameTime = Time.time;
                 _currentTime = _startGameTime;
@@ -237,8 +265,10 @@ public class GameManager : MonoBehaviour
     {
         if (_hatched)
         {
-            if (!BaseChar.IsPlaying(GeneralSettings.EggHatch))
+            if (!EggChar.IsPlaying(GeneralSettings.EggHatch))
             {
+                EggChar.gameObject.SetActive(false);
+                BaseChar.gameObject.SetActive(true);
                 _currentStage = EvolutionSettings.LifetimeStage.Baby;
                 UpdateStateTime();
                 _lastPoop = Time.time;
@@ -273,12 +303,24 @@ public class GameManager : MonoBehaviour
             _hatched = true;
             Hammer.gameObject.SetActive(false);
             Instance.SFXHatch.Play();
-            BaseChar.Play(GeneralSettings.EggHatch);
+            EggChar.Play(GeneralSettings.EggHatch);
             
+            if (Title.activeSelf)
+            {
+                EggBackground.SetActive(false);
+                Title.SetActive(false);
+                TitleSparkle.Stop();
+                TitleSparkle.gameObject.SetActive(false);
+                TitleFade.gameObject.SetActive(true);
+                TitleFade.Play(TitleFade.Clip);
+                _hunger = 0;
+                _sleepNeeded = 0;
+            }
         }
 
         if (InputProxy.Instance.SubmitDown)
         {
+            _lastHammerHitTime = Time.time;
             GameManager.Instance.SFXHighlight.Play();
             _currentHits++;
             if (!Hammer.IsPlaying(GeneralSettings.HammerHit))
@@ -289,11 +331,17 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            if (!BaseChar.IsPlaying(GeneralSettings.EggIdle) && !Hammer.IsPlaying(GeneralSettings.HammerHit))
+            if (!EggChar.IsPlaying(GeneralSettings.EggIdle) && !Hammer.IsPlaying(GeneralSettings.HammerHit))
             {
                 Hammer.Play(GeneralSettings.HammerIdle);
-                BaseChar.Play(GeneralSettings.EggIdle);
+                EggChar.Play(GeneralSettings.EggIdle);
             }
+        }
+
+        if (Time.time - _lastHammerHitTime > 10)
+        {
+            //Reset hits if somebody walks away
+            _currentHits = 0;
         }
 
         return true;
@@ -337,6 +385,8 @@ public class GameManager : MonoBehaviour
             }
         }
     }
+
+    private Sequence _bounceSequence;
    
     private void GeneralUpdate(EvolutionSettings.LifetimeStage stage, bool firstUpdate)
     {
@@ -380,6 +430,22 @@ public class GameManager : MonoBehaviour
                     BaseChar.Play(currentPhase.IdleVerySad);
                 }
             }
+        }
+        
+        if (currentPhase.UseBounceAnim && _currentStage != EvolutionSettings.LifetimeStage.Senior && _currentStage != EvolutionSettings.LifetimeStage.Dead)
+        {
+            if (_bounceSequence == null || !_bounceSequence.IsPlaying())
+            {
+                _bounceSequence?.Kill();
+                _bounceSequence = DOTween.Sequence();
+                _bounceSequence.Append(BaseChar.transform.DOScale(new Vector3(0.995f, 1.05f, 1), 0.4f));
+                _bounceSequence.Append(BaseChar.transform.DOScale(new Vector3(1, 1, 1), 0.4f));
+            }
+        }
+        else
+        {
+            _bounceSequence?.Kill();
+            BaseChar.transform.localScale = Vector3.one;
         }
         
         //Clean cooldown
@@ -441,7 +507,6 @@ public class GameManager : MonoBehaviour
             var rhs = stageTime;
             EvoBar.SetValue(Mathf.Max(rhs-lhs), rhs);
 
-          
             if (lhs / rhs > 0.8f)
             {
                 if (evoShake == null || !evoShake.IsPlaying())
@@ -469,6 +534,8 @@ public class GameManager : MonoBehaviour
                 {
                     if (!_dying)
                     {
+                        //Meteor.gameObject.SetActive(true);
+                        //Meteor.Play(Meteor.Clip);
                         _dying = true;
                         StartCoroutine(Die());
                     }
@@ -483,6 +550,7 @@ public class GameManager : MonoBehaviour
                         PlayEvolutionAnimation(() =>
                         {
                             _currentStage = EvolutionSettings.LifetimeStage.Senior;
+                            BaseChar.Play(currentPhase.Speak);
                         });
                         break;
                     }
@@ -521,6 +589,7 @@ public class GameManager : MonoBehaviour
                     {
                         _currentStage = (EvolutionSettings.LifetimeStage) ((int)_currentStage) + 1;
                         currentPhase = condition.Evolution;
+                        BaseChar.Play(currentPhase.Speak);
                     });
                 }
             }
@@ -544,11 +613,12 @@ public class GameManager : MonoBehaviour
         LightsOn(false);
         MainMenu.Close();
         MainMenu.gameObject.SetActive(false);
+        TopBar.gameObject.SetActive(false);
 
         Aurdino.Instance.UpdateState(Aurdino.GameState.Dead);
         
         Instance.SFXDeath.Play();
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(1.3f);
         BaseChar.Play(currentPhase.Death);
 
         yield return new WaitForSeconds(3f);
@@ -643,7 +713,7 @@ public class GameManager : MonoBehaviour
     }
 
     [UsedImplicitly]
-    public void LightsOn( bool updateArdinoState = true)
+    public void LightsOn( bool updateArdinoState)
     {
         if (updateArdinoState)
         {
@@ -656,6 +726,12 @@ public class GameManager : MonoBehaviour
         Zzz.gameObject.SetActive(false);
         GrimReaperEvent.gameObject.SetActive(false);
         EnviromentMenuSlideOff();
+    }
+
+    [UsedImplicitly]
+    public void LightsOn()
+    {
+        LightsOn(true);
     }
 
     private Coroutine currentEvent;
@@ -684,6 +760,10 @@ public class GameManager : MonoBehaviour
     public void FeedVeg()
     {
         Instance.SFXEatingBig.Play();
+        MeatFoodEat.gameObject.SetActive(false);
+        SweetFoodEat.gameObject.SetActive(false);
+        VegFoodEat.gameObject.SetActive(true);
+        VegFoodEat.Play(VegFoodEat.Clip);
         _hunger = Mathf.Max(0, _hunger-HungerEatReduction);
         _vegPoints++;
         EnviromentMenuSlideOff();
@@ -694,6 +774,10 @@ public class GameManager : MonoBehaviour
     public void FeedMeat()
     {
         Instance.SFXEatingBig.Play();
+        MeatFoodEat.gameObject.SetActive(true);
+        SweetFoodEat.gameObject.SetActive(false);
+        VegFoodEat.gameObject.SetActive(false);
+        MeatFoodEat.Play(MeatFoodEat.Clip);
         _hunger = Mathf.Max(0, _hunger-HungerEatReduction);
         _meatPoints++;
         EnviromentMenuSlideOff();
@@ -704,6 +788,10 @@ public class GameManager : MonoBehaviour
     public void FeedSweet()
     {
         Instance.SFXEatingBig.Play();
+        MeatFoodEat.gameObject.SetActive(false);
+        SweetFoodEat.gameObject.SetActive(true);
+        VegFoodEat.gameObject.SetActive(false);
+        SweetFoodEat.Play(SweetFoodEat.Clip);
         _hunger = Mathf.Max(0, _hunger-HungerEatReduction);
         _sweetPoints++;
         EnviromentMenuSlideOff();

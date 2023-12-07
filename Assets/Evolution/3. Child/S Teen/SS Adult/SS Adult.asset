@@ -25,3 +25,4 @@ MonoBehaviour:
   EvolutionConditions:
   - FoodType: 0
     Evolution: {fileID: 0}
+  UseBounceAnim: 1

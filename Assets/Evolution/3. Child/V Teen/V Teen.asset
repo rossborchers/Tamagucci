@@ -29,3 +29,4 @@ MonoBehaviour:
     Evolution: {fileID: 11400000, guid: 80e4138fe751846b1ad617a56534d983, type: 2}
   - FoodType: 2
     Evolution: {fileID: 11400000, guid: 0cd4c884af928478cad3e2418fef29ea, type: 2}
+  UseBounceAnim: 1

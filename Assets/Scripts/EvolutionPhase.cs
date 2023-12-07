@@ -40,4 +40,6 @@ public class EvolutionPhase : ScriptableObject
 
    [Space]
    public List<EvolutionCondition> EvolutionConditions;
+
+   public bool UseBounceAnim = true;
 }
