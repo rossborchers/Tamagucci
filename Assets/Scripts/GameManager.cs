@@ -249,15 +249,6 @@ public class GameManager : MonoBehaviour
             {
                 _currentTime+=Time.deltaTime;
             }
-
-            if (_sleeping)
-            {
-                LightsMenu.CurrentIndex = 1;
-            }
-            else
-            {
-                LightsMenu.CurrentIndex = 0;
-            }
         }
     }
    
@@ -292,7 +283,7 @@ public class GameManager : MonoBehaviour
             StartCoroutine(DelaySend());
             IEnumerator DelaySend()
             {
-                yield return new WaitForSeconds(1);
+                yield return new WaitForSeconds(2);
                 Aurdino.Instance.UpdateState(Aurdino.GameState.Egg);
             }
            
@@ -619,11 +610,27 @@ public class GameManager : MonoBehaviour
         
         Instance.SFXDeath.Play();
         yield return new WaitForSeconds(1.3f);
-        BaseChar.Play(currentPhase.Death);
 
+        if (!BaseChar.IsPlaying(currentPhase.Death))
+        {
+            BaseChar.Play(currentPhase.Death);
+        }
+        
         yield return new WaitForSeconds(3f);
         _currentStage = EvolutionSettings.LifetimeStage.Dead;
         _dying = false;
+    }
+
+    public void SetLightsMenuIndex()
+    {
+        if (_sleeping)
+        {
+            LightsMenu.CurrentIndex = 1;
+        }
+        else
+        {
+            LightsMenu.CurrentIndex = 0;
+        }
     }
     private void PlayEvolutionAnimation(Action evolveCallback)
     {
@@ -856,7 +863,9 @@ public class GameManager : MonoBehaviour
             GrimReaperEvent.SetActive(false);
             EndGameEvent.SetActive(true);
 
-            yield return new WaitForSeconds(3);
+            yield return new WaitForSeconds(2);
+            Aurdino.Instance.UpdateState(Aurdino.GameState.Egg);
+            yield return new WaitForSeconds(1);
             SceneManager.LoadScene(0);
         }
     }

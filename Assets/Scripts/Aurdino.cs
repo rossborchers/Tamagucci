@@ -67,7 +67,7 @@ public class Aurdino : MonoBehaviour
          
          _lastSendTime = Time.time;
 
-        lock (_mutex)
+         lock (_mutex)
         {
             Debug.Log($"Updating state: {state}");
             _currentGameState = state;
@@ -87,7 +87,7 @@ public class Aurdino : MonoBehaviour
     private void Awake()
     {
         Instance = this;
-
+        
         string path = $"{Application.streamingAssetsPath}/SerialSettings.json";
 
         if (!Directory.Exists(Application.streamingAssetsPath))
@@ -247,6 +247,16 @@ public class Aurdino : MonoBehaviour
                 //Debug.Log($"Wrote: {_lastWrittenValue}");
                 _lastWrittenValue = String.Empty;
             }
+        }
+    }
+
+    private void OnDestroy()
+    {
+        _serialThread?.Abort();
+
+        if (_serialPort != null && _serialPort.IsOpen)
+        {
+            _serialPort.Close();
         }
     }
 
