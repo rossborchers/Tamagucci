@@ -13,6 +13,8 @@ using Sequence = DG.Tweening.Sequence;
 
 public class GameManager : MonoBehaviour
 {
+    public List<MiniGame> MiniGames;
+    
     public AudioSource SFXEatingBig;
     public AudioSource SFXEatingSmall;
     public AudioSource SFXEvolve;
@@ -27,8 +29,7 @@ public class GameManager : MonoBehaviour
     public SpriteAnim BaseChar;
     public SpriteAnim EggChar;
     public SpriteAnim Hammer;
-
-
+    
     public SpriteAnim SweetFoodEat;
     public SpriteAnim MeatFoodEat;
     public SpriteAnim VegFoodEat;
@@ -121,6 +122,8 @@ public class GameManager : MonoBehaviour
 
     private float _lastPoop;
 
+    private MiniGame _currentMinigame = null;
+
     private void Awake()
     {
         Instance = this;
@@ -189,6 +192,40 @@ public class GameManager : MonoBehaviour
         }
         
         bool firstUpdate = _lastStage != _currentStage;
+
+        if (firstUpdate && currentPhase.StartMinigames.Count > 0)
+        {
+            MiniGame.MiniGameType chosenGame = currentPhase.StartMinigames[Random.Range(0, currentPhase.StartMinigames.Count)];
+            foreach (var g in MiniGames)     
+            {
+                if (g.GameType == chosenGame)
+                {
+                    _currentMinigame = g;
+                    _currentMinigame.StartMinigame(chosenGame);
+                    _currentMinigame.OnMinigameEnd += (bool success) =>
+                    {
+                        if (success)
+                        {
+                            Debug.Log("MINIGAME SUCCESS");
+                        }
+                        else
+                        {
+                            Debug.Log("MINIGAME FAILURE");
+                        }
+
+                        _currentMinigame = null;
+                    };
+                }
+            }
+        }
+
+        //Dont perform stage logic or update anything
+        if (_currentMinigame != null)
+        {
+            return;
+        }
+        
+        
         switch (_currentStage)
         {
             case EvolutionSettings.LifetimeStage.Egg:
@@ -238,6 +275,7 @@ public class GameManager : MonoBehaviour
         {
             return;
         }
+        
         TryMoveToNextStage();
 
         if (currentPhase != null)
@@ -285,6 +323,8 @@ public class GameManager : MonoBehaviour
         
         if (firstUpdate)
         {
+            
+            
             GrimReaperEvent.gameObject.SetActive(false);
             Hearts.gameObject.SetActive(false);
             Zzz.gameObject.SetActive(false);

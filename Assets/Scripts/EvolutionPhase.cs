@@ -20,6 +20,8 @@ public class EvolutionPhase : ScriptableObject
       Sweet
    }
 
+   public List<MiniGame.MiniGameType> StartMinigames;
+
    public AnimationClip IdleHappy;
    public AnimationClip IdleSad;
    
