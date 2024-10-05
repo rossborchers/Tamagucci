@@ -5,7 +5,6 @@ using System.Collections;
 using System.Collections.Generic;
 using PowerTools;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
@@ -51,6 +50,7 @@ public class GameManager : MonoBehaviour
 
     public GameObject Environment;
 
+    public TMP_Text DeathReasonText;
     public SelectionMenu MainMenu;
     public SelectionMenu LightsMenu;
     public SelectionMenu FoodMenu;
@@ -156,6 +156,15 @@ public class GameManager : MonoBehaviour
         {
             Aurdino.Instance.UpdateState(Aurdino.GameState.Dead);
         }
+
+        if (Input.GetKey(KeyCode.LeftControl))
+        {
+            Time.timeScale = 3f;
+        }
+        else
+        {
+            Time.timeScale = 1f;
+        }
         
         if (_currentStage == EvolutionSettings.LifetimeStage.Egg)
         {
@@ -225,6 +234,10 @@ public class GameManager : MonoBehaviour
                 break;
         }
 
+        if (endGameBusy)
+        {
+            return;
+        }
         TryMoveToNextStage();
 
         if (currentPhase != null)
@@ -347,14 +360,14 @@ public class GameManager : MonoBehaviour
 
             if (_endGameCoroutine == null)
             {
-                _endGameCoroutine = StartCoroutine(EndGameAfter(3f));
+                _endGameCoroutine = StartCoroutine(EndGameAfter(3f, "DEATH BY\nOLD AGE"));
             }
         }
 
-        IEnumerator EndGameAfter(float time)
+        IEnumerator EndGameAfter(float time, string reason)
         {
             yield return new WaitForSeconds(time);
-            EndGame(); 
+            EndGame(reason); 
             _endGameCoroutine = null;
         }
     }
@@ -507,9 +520,36 @@ public class GameManager : MonoBehaviour
                 }
             }
         }
-        
-        ClnBar.SetValue(MaxClean - Mathf.Clamp(_activePoop.Count, 0, MaxClean), MaxClean);
+
+        float cln = Mathf.Clamp(_activePoop.Count, 0, MaxClean);
+        ClnBar.SetValue(MaxClean -cln , MaxClean);
         SlpBar.SetValue(MaxSleep-_sleepNeeded, MaxSleep);
+
+        //FAIL YOU STARVED/DIED OF LACK OF SLEEP/DIED OF DIRTY
+        bool shouldDie = false;
+        string deathReason = "";
+        if (_sleepNeeded > MaxSleep)
+        {
+            deathReason = "LACK OF SLEEP";
+            shouldDie = true;
+        }
+        else if (_hunger > MaxHunger)
+        {
+            deathReason = "STARVATION";
+            shouldDie = true;
+        }
+        else if(cln >= MaxClean)
+        {
+            deathReason = "DROWNING IN POOP";
+            shouldDie = true;
+        }
+        
+
+        if (shouldDie)
+        {
+            EndGame("DEATH BY\n"+deathReason);
+            return;
+        }
 
        if (GameTime >= transitionTime && !_evolving)
         {
@@ -845,13 +885,20 @@ public class GameManager : MonoBehaviour
         GrimReaperEvent.gameObject.SetActive(true);
     }
 
-    public void EndGame()
+    private bool endGameBusy = false;
+    public void EndGame(string reason)
     {
+        if (endGameBusy)
+        {
+            return;
+        }
+        endGameBusy = true;
         _currentStage = EvolutionSettings.LifetimeStage.Dead;
         ResetCurrentEvent();
         currentEvent = StartCoroutine(EndGameCo());
         IEnumerator EndGameCo()
         {
+            DeathReasonText.text = reason;
             MainMenu.Close();
             MainMenu.gameObject.SetActive(false);
             TopBar.SetActive(false);

@@ -15,7 +15,7 @@ MonoBehaviour:
   EggHammerHits: 6
   PoopsPerSecond: 0.25
   BabyToTeenTime: 20
-  TeenToAdultTime: 40
+  TeenToAdultTime: 60
   AdultToSeniorTime: 100
   SeniorToDeadTime: 120
   DeadToRestartTime: 130
