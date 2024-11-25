@@ -1,0 +1,16 @@
+{
+  "name": "Rive.Editor",
+  "references": [
+    "Rive.Runtime",
+    "Editor"
+  ],
+  "includePlatforms": [
+      "Editor"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "overrideReferences": false,
+  "autoReferenced": true,
+  "noEngineReferences": false
+}
+

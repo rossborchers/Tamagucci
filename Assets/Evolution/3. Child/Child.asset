@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b2b5d59e15624498090624c9b4237936, type: 3}
   m_Name: Child
   m_EditorClassIdentifier: 
+  StartMinigames: 
   IdleHappy: {fileID: 7400000, guid: 0fd557cb57c534448894941fb254d715, type: 2}
   IdleSad: {fileID: 7400000, guid: 144a7bcb8fedb4d42a080d0aada7d3b8, type: 2}
   IdleVeryHappy: {fileID: 7400000, guid: 0d326853d7288416385f175bb12ddddd, type: 2}

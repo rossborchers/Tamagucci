@@ -25,6 +25,10 @@ public class InputProxy : MonoBehaviour
 
     void Start()
     {
+        if (!Ardino)
+        {
+            return;
+        }
         //update order -400 will run before proxy update (-200) then game logic
         Ardino.OnButtonPressed += button =>
         {

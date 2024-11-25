@@ -13,6 +13,7 @@ public abstract class MiniGame : MonoBehaviour
    {
       None = 0,
       FeedHomeworkToDog = 1,
+      Car = 2,
    }
 
    private void Awake()

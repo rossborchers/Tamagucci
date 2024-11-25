@@ -97,6 +97,8 @@ public class GameManager : MonoBehaviour
     private int _currentHits;
     private bool _hatched;
 
+    private bool _completedMinigameForState;
+
     public float HungerEatReduction = 3;
     public float HungerGrowthSpeed = 0.25f;
     public float MaxHunger = 6;
@@ -192,18 +194,26 @@ public class GameManager : MonoBehaviour
         }
         
         bool firstUpdate = _lastStage != _currentStage;
+        
+        //Dont perform stage logic or update anything
+        if (_currentMinigame != null)
+        {
+            return;
+        }
 
-        if (firstUpdate && currentPhase.StartMinigames.Count > 0)
+        if (firstUpdate && currentPhase.StartMinigames.Count > 0 && !_completedMinigameForState)
         {
             MiniGame.MiniGameType chosenGame = currentPhase.StartMinigames[Random.Range(0, currentPhase.StartMinigames.Count)];
             foreach (var g in MiniGames)     
             {
                 if (g.GameType == chosenGame)
                 {
+                    
                     _currentMinigame = g;
                     _currentMinigame.StartMinigame(chosenGame);
                     _currentMinigame.OnMinigameEnd += (bool success) =>
                     {
+                        _completedMinigameForState = true;
                         if (success)
                         {
                             Debug.Log("MINIGAME SUCCESS");
@@ -217,12 +227,6 @@ public class GameManager : MonoBehaviour
                     };
                 }
             }
-        }
-
-        //Dont perform stage logic or update anything
-        if (_currentMinigame != null)
-        {
-            return;
         }
         
         
@@ -323,8 +327,6 @@ public class GameManager : MonoBehaviour
         
         if (firstUpdate)
         {
-            
-            
             GrimReaperEvent.gameObject.SetActive(false);
             Hearts.gameObject.SetActive(false);
             Zzz.gameObject.SetActive(false);
