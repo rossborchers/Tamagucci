@@ -13,6 +13,7 @@ using Sequence = DG.Tweening.Sequence;
 
 public class GameManager : MonoBehaviour
 {
+    public GameObject Midpoint;
     public List<MiniGame> MiniGames;
     
     public AudioSource SFXEatingBig;
@@ -139,6 +140,11 @@ public class GameManager : MonoBehaviour
         VegFoodEat.gameObject.SetActive(false);
     }
 
+    private bool TimeForMinigame()
+    {
+        return GetNormalizedStageTime() > 0.5f;
+    }
+
     public void Update()
     {
         if (Input.GetKeyDown(KeyCode.F1))
@@ -194,6 +200,12 @@ public class GameManager : MonoBehaviour
         }
         
         bool firstUpdate = _lastStage != _currentStage;
+
+
+        if (currentPhase.StartMinigames.Count == 0)
+        {
+            Midpoint.gameObject.SetActive(false);
+        }
         
         //Dont perform stage logic or update anything
         if (_currentMinigame != null)
@@ -201,9 +213,22 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-        if (firstUpdate && currentPhase.StartMinigames.Count > 0 && !_completedMinigameForState)
+        bool isSeniorUpdate = _currentStage == EvolutionSettings.LifetimeStage.Senior;
+        if (TimeForMinigame() && (currentPhase.StartMinigames.Count > 0) && !_completedMinigameForState || isSeniorUpdate && GeneralSettings.SeniorMinigame.Count > 0)
         {
-            MiniGame.MiniGameType chosenGame = currentPhase.StartMinigames[Random.Range(0, currentPhase.StartMinigames.Count)];
+            Debug.Log("TIME FOR MINIGAME");
+            Midpoint.gameObject.SetActive(false);
+            MainMenu.Close();
+            MiniGame.MiniGameType chosenGame;
+            
+            if(isSeniorUpdate)
+            {
+                chosenGame = GeneralSettings.SeniorMinigame[Random.Range(0, GeneralSettings.SeniorMinigame.Count)];
+            }
+            else 
+            {
+                chosenGame = currentPhase.StartMinigames[Random.Range(0, currentPhase.StartMinigames.Count)];
+            }
             foreach (var g in MiniGames)     
             {
                 if (g.GameType == chosenGame)
@@ -671,6 +696,17 @@ public class GameManager : MonoBehaviour
 
     private bool _evolving = false;
 
+    public float GetNormalizedStageTime()
+    {
+        float lastEvoTime = GeneralSettings.GetStageTransitionTime(_lastEvolvutionsStage);
+        float evoTime = GeneralSettings.GetStageTransitionTime(_currentStage);
+        float stageTime = evoTime - lastEvoTime;
+        float currentStageTime = GameTime - lastEvoTime;
+        float normT = currentStageTime / stageTime;
+        Debug.LogError("NORM TIME: " + normT);
+        return normT;
+    }
+    
     private void UpdateStateTime()
     {
         float lastEvoTime = GeneralSettings.GetStageTransitionTime(_lastEvolvutionsStage);

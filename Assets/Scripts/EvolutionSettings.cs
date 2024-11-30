@@ -6,6 +6,8 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "TamaG/CommonEvolutionSettings")]
 public class EvolutionSettings : ScriptableObject
 {
+   public List<MiniGame.MiniGameType> SeniorMinigame;
+   
    public enum LifetimeStage
    {
       None = 0,
