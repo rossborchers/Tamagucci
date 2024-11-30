@@ -636,18 +636,9 @@ public class RiveRender : MonoBehaviour
 
     public bool GetBool(string boolName)
     {
+        
         SMIBool b = MStateMachine.GetBool(boolName);
-
-        if (b.IsBoolean)
-        {
-            return b.Value;
-        }
-        else
-        {
-            Debug.LogError("Not bool!!");
-        }
-
-        return false;
+        return b.Value;
     }
 
     private void OnDestroy()
