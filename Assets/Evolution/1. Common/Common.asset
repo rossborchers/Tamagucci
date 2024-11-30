@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bf708d7ca9e5b45c1bbe68e89f21523a, type: 3}
   m_Name: Common
   m_EditorClassIdentifier: 
+  SeniorMinigame: 03000000
   EggHammerHits: 6
   PoopsPerSecond: 0.25
   BabyToTeenTime: 20
