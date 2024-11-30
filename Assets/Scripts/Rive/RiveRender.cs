@@ -634,6 +634,22 @@ public class RiveRender : MonoBehaviour
         }
     }
 
+    public bool GetBool(string boolName)
+    {
+        SMIBool b = MStateMachine.GetBool(boolName);
+
+        if (b.IsBoolean)
+        {
+            return b.Value;
+        }
+        else
+        {
+            Debug.LogError("Not bool!!");
+        }
+
+        return false;
+    }
+
     private void OnDestroy()
     {
         // Release the RenderTexture when it's no longer needed
