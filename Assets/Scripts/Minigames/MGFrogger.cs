@@ -4,9 +4,13 @@ using UnityEngine;
 
 public class MGFrogger : MiniGame
 {
-    private const string LeftTrigger = "LeftDown";
-    private string RightTrigger = "RightDown";
-    private const string GameStartRigger = "StartFromMain";
+    private const string LeftTrigger = "Jump_Backward";
+    private string RightTrigger = "Jump_Forward";
+    private const string GameStartRigger = "Restart";
+    
+    
+    private string WinBool = "Win";
+    private string DeathBool = "Death";
     private RiveRender Renderer;
 
     private bool _gameHasStarted;
@@ -33,11 +37,24 @@ public class MGFrogger : MiniGame
     // Update is called once per frame
     void Update()
     {
-        if (_won || _lost)
+        _won = Renderer.GetBool(WinBool);
+        _lost = Renderer.GetBool(DeathBool);
+        if (_won)
         {
             if (InputProxy.Instance.LeftDown || InputProxy.Instance.RightDown || InputProxy.Instance.SubmitDown)
             {
+                _won = false;
                 EndMiniGame(_won);
+            }
+        }
+
+        if (_lost)
+        {
+            if (InputProxy.Instance.LeftDown || InputProxy.Instance.RightDown || InputProxy.Instance.SubmitDown)
+            {
+                _gameHasStarted = true;
+                _lost = false;
+                Renderer.TriggerVariable(GameStartRigger, true);
             }
         }
         

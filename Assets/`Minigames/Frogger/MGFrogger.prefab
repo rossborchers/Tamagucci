@@ -209,7 +209,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _dimensionSpecification: 0
-  _asset: {fileID: -4516626237390682484, guid: 2f8f284823aae0442b436739b4b02f25, type: 3}
+  _asset: {fileID: -4516626237390682484, guid: c893d9d6a1fd6d940a1399949894cef9, type: 3}
   _defaultArtBoard: 1
   _artBoardLoadType: 0
   _artBoardIndex: 0
@@ -231,37 +231,5 @@ MonoBehaviour:
   _staticTextRuns: []
   _variablesSetAtStart: []
   _interactionEvents: []
-  _artBoardEvents:
-  - _eventName: Lose
-    _eventToTrigger:
-      m_PersistentCalls:
-        m_Calls:
-        - m_Target: {fileID: 0}
-          m_TargetAssemblyTypeName: MGCar, Assembly-CSharp
-          m_MethodName: EventLose
-          m_Mode: 1
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
-  - _eventName: Win
-    _eventToTrigger:
-      m_PersistentCalls:
-        m_Calls:
-        - m_Target: {fileID: 0}
-          m_TargetAssemblyTypeName: MGCar, Assembly-CSharp
-          m_MethodName: EventWin
-          m_Mode: 1
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
+  _artBoardEvents: []
   _resetEvents: []
