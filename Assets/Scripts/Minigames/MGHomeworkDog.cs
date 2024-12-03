@@ -1,10 +1,13 @@
 using PowerTools;
 using System;
+using System.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Serialization;
 
 public class MGHomeworkDog : MiniGame
 {
+    public GameObject Fin;
     public Transform HWRoot;
     public Transform BeforeIn;
     public Transform TargetIn;
@@ -29,6 +32,7 @@ public class MGHomeworkDog : MiniGame
 
     public void OnEnable()
     {
+        Fin.SetActive(false);
         _gameStarted = false;
         Title.gameObject.SetActive(true); 
         Title.Play(Title.Clip);
@@ -37,11 +41,18 @@ public class MGHomeworkDog : MiniGame
         HWRoot.position = BeforeIn.position;
     }
 
+    public int PagesToEat = 4;
+
+    private int _currentEaten;
+
     private float _startTime;
     private bool _gameStarted;
     void Update()
     {
-        HWRoot.position = Vector3.MoveTowards(HWRoot.position, TargetIn.position, Time.deltaTime);
+        if (_gameStarted)
+        {
+            HWRoot.position = Vector3.MoveTowards(HWRoot.position, TargetIn.position, Time.deltaTime*4);
+        }
         
         if (InputProxy.Instance.LeftDown || InputProxy.Instance.RightDown || InputProxy.Instance.SubmitDown)
         {
@@ -101,17 +112,6 @@ public class MGHomeworkDog : MiniGame
                     HW10Percent.gameObject.SetActive(true);
                 }
             }
-
-            void RemoveAllHW()
-            {
-                HW100Percent.gameObject.SetActive(false);
-                HW80Percent.gameObject.SetActive(false);
-                HW60Percent.gameObject.SetActive(false);
-                HW40Percent.gameObject.SetActive(false);
-                HW20Percent.gameObject.SetActive(false);
-                HW10Percent.gameObject.SetActive(false);
-            }
-         
         }
         else if (!Dog.IsPlaying())
         {
@@ -120,9 +120,39 @@ public class MGHomeworkDog : MiniGame
 
         if (_amount <= 0)
         {
-            EndMiniGame(true);
-        }
+            _currentEaten = Mathf.Min(_currentEaten+1, PagesToEat);
 
+            if (_currentEaten >= PagesToEat)
+            {
+                RemoveAllHW();
+                Fin.SetActive(true);
+
+                StartCoroutine(WaitThenEnd());
+
+                IEnumerator WaitThenEnd()
+                {
+                    yield return new WaitForSeconds(2f);
+                    EndMiniGame(true);
+                }
+            }
+            else
+            {
+                RemoveAllHW();
+                HW100Percent.gameObject.SetActive(true);
+                _amount = 1;
+                HWRoot.position = BeforeIn.position;
+            }
+        }
+    }
+    
+    void RemoveAllHW()
+    {
+        HW100Percent.gameObject.SetActive(false);
+        HW80Percent.gameObject.SetActive(false);
+        HW60Percent.gameObject.SetActive(false);
+        HW40Percent.gameObject.SetActive(false);
+        HW20Percent.gameObject.SetActive(false);
+        HW10Percent.gameObject.SetActive(false);
     }
 
     public override MiniGameType GameType => MiniGameType.FeedHomeworkToDog;

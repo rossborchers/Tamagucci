@@ -4,93 +4,116 @@ using UnityEngine;
 
 public class MGFrogger : MiniGame
 {
+    public GameObject Fin;
     private const string LeftTrigger = "Jump_Backward";
-    private string RightTrigger = "Jump_Forward";
-    private const string GameStartRigger = "Restart";
-    
+    private const string RightTrigger = "Jump_Forward";
+    private const string GameReStartRigger = "Restart";
+    private const string GameStartRigger = "StartGame";
     
     private string WinBool = "Win";
     private string DeathBool = "Death";
     private RiveRender Renderer;
-
-    private bool _gameHasStarted;
+    
     private bool _won;
     private bool _lost;
     void OnEnable()
     {
         Renderer = GetComponentInChildren<RiveRender>();
-        
-      
-        //StartMinigame
+        Fin.SetActive(false);
     }
 
     public void EventWin()
     {
         _won = true;
     }
-
-    public void EventLose()
+    
+    public void EventDeath()
     {
         _lost = true;
     }
 
+    private Coroutine _restartCoroutine = null;
+    
+    private bool _gameStarted = false;
+
     // Update is called once per frame
     void Update()
     {
-        _won = Renderer.GetBool(WinBool);
-        _lost = Renderer.GetBool(DeathBool);
-        if (_won)
+        if (_restartCoroutine != null)
         {
-            if (InputProxy.Instance.LeftDown || InputProxy.Instance.RightDown || InputProxy.Instance.SubmitDown)
-            {
-                _won = false;
-                EndMiniGame(_won);
-            }
-        }
-
-        if (_lost)
-        {
-            if (InputProxy.Instance.LeftDown || InputProxy.Instance.RightDown || InputProxy.Instance.SubmitDown)
-            {
-                _gameHasStarted = true;
-                _lost = false;
-                Renderer.TriggerVariable(GameStartRigger, true);
-            }
+            return;
         }
         
-        if (!_gameHasStarted)
+        if (!_gameStarted)
         {
-            if (InputProxy.Instance.LeftDown || InputProxy.Instance.RightDown || InputProxy.Instance.SubmitDown)
+            if (InputProxy.Instance.LeftDown || InputProxy.Instance.RightDown ||
+                     InputProxy.Instance.SubmitDown)
             {
-                _gameHasStarted = true;
+                Debug.Log("Frogger Game Started!");
                 Renderer.TriggerVariable(GameStartRigger, true);
+                _gameStarted = true;
             }
-            else
-            {
-                Renderer.TriggerVariable(GameStartRigger, false);
-            }
-            
             return;
         }
         
         if (InputProxy.Instance.LeftDown)
         {
-            Renderer.TriggerVariable(LeftTrigger, true);
-        }
-        else
-        {
-            Renderer.TriggerVariable(LeftTrigger, false);
+            Renderer.TriggerVariable(LeftTrigger);
         }
         
         if (InputProxy.Instance.RightDown)
         {
-            Renderer.TriggerVariable(RightTrigger, true);
+            Renderer.TriggerVariable(RightTrigger);
         }
-        else
+        
+        if (_won)
         {
-            Renderer.TriggerVariable(RightTrigger, false);
+            Fin.SetActive(true);
+
+            StartCoroutine(WaitThenEnd());
+
+            IEnumerator WaitThenEnd()
+            {
+                yield return new WaitForSeconds(2f);
+                EndMiniGame(false);
+            }
+        }
+        else if (_lost)
+        {
+            _restartCoroutine = StartCoroutine(AskForRestart());
         }
     }
 
-    public override MiniGameType GameType => MiniGameType.Car;
+    IEnumerator AskForRestart()
+    {
+        GameManager.Instance.BringUpTryAgainMenu();
+        while (GameManager.Instance.TryAgainMenuUp)
+        {
+            yield return null;
+        }
+        
+        bool tryAgain = GameManager.Instance.TryAgainResult();
+
+        if (tryAgain)
+        {
+            Renderer.TriggerVariable(GameReStartRigger);
+            _lost = false;
+        }
+        else
+        {
+            Fin.SetActive(true);
+
+            StartCoroutine(WaitThenEnd());
+
+            IEnumerator WaitThenEnd()
+            {
+                yield return new WaitForSeconds(2f);
+                EndMiniGame(false);
+            }
+        }
+
+        _restartCoroutine = null;
+    }
+
+    public override MiniGameType GameType => MiniGameType.Frogger;
 }

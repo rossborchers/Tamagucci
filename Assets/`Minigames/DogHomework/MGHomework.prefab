@@ -32,7 +32,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 6029817827154042261}
-  m_Father: {fileID: 2041725064385404533}
+  m_Father: {fileID: 7922304773688244677}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -110,7 +110,7 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4287900845
+    rgba: 4289630508
   m_fontColor: {r: 0.17254901, g: 0.57012874, b: 0.68235296, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 2
@@ -278,6 +278,38 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!1 &1447852091052049491
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7922304773688244677}
+  m_Layer: 0
+  m_Name: Fin
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7922304773688244677
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1447852091052049491}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 4252468556654124565}
+  m_Father: {fileID: 2041725064385404533}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1575158330070366211
 GameObject:
   m_ObjectHideFlags: 0
@@ -308,7 +340,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 4252468556654124565}
   - {fileID: 8638744117725979072}
   - {fileID: 312234639839932028}
   - {fileID: 6665247256433414563}
@@ -317,6 +348,7 @@ Transform:
   - {fileID: 1256198126268148884}
   - {fileID: 653626684256847524}
   - {fileID: 963483291456411801}
+  - {fileID: 7922304773688244677}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &7993920708001215172
@@ -331,6 +363,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 28af56cad04bcc2499dfbaee50314fb6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Fin: {fileID: 1447852091052049491}
   HWRoot: {fileID: 7802566525884980642}
   BeforeIn: {fileID: 1256198126268148884}
   TargetIn: {fileID: 3179535632076423737}
@@ -346,7 +379,8 @@ MonoBehaviour:
   HW40Percent: {fileID: 1554445621197099743}
   HW20Percent: {fileID: 8216371277814712132}
   HW10Percent: {fileID: 5806206571411209774}
-  AmountPerClick: 0.05
+  AmountPerClick: 0.1
+  PagesToEat: 4
 --- !u!1 &2484912222014421297
 GameObject:
   m_ObjectHideFlags: 0
@@ -510,7 +544,7 @@ Transform:
   m_GameObject: {fileID: 3375364812823941259}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.05, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -549,7 +583,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 89a8ca009b14008429f621808bba2086, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_defaultAnim: {fileID: 7400000, guid: 98d61d1b22439814b98d38d9494ba686, type: 2}
+  m_defaultAnim: {fileID: 7400000, guid: 3dd162bae0fe2054386151c2234e272f, type: 2}
 --- !u!212 &3735291142103360718
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -591,15 +625,15 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: 21300000, guid: 4d47dabd820e519449e5d5bb3d828864, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 3.9, y: 3.1}
+  m_Size: {x: 7, y: 7}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 0
+  m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!210 &4938476851198043426

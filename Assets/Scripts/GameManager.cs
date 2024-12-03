@@ -56,6 +56,7 @@ public class GameManager : MonoBehaviour
     public SelectionMenu MainMenu;
     public SelectionMenu LightsMenu;
     public SelectionMenu FoodMenu;
+    public SelectionMenu TryAgainMenu;
     
     public SpriteAnim EvolutionAnimation;
 
@@ -94,6 +95,7 @@ public class GameManager : MonoBehaviour
     private float _startGameTime;
     private float _currentTime;
     private float GameTime => _currentTime - _startGameTime;
+    public bool TryAgainMenuUp { get; private set; }
 
     private int _currentHits;
     private bool _hatched;
@@ -138,6 +140,7 @@ public class GameManager : MonoBehaviour
         MeatFoodEat.gameObject.SetActive(false);
         SweetFoodEat.gameObject.SetActive(false);
         VegFoodEat.gameObject.SetActive(false);
+        TryAgainMenu.Close();
     }
 
     private bool TimeForMinigame()
@@ -239,6 +242,7 @@ public class GameManager : MonoBehaviour
                     _currentMinigame.OnMinigameEnd += (bool success) =>
                     {
                         _completedMinigameForState = true;
+                        MainMenu.Open();
                         if (success)
                         {
                             Debug.Log("MINIGAME SUCCESS");
@@ -595,7 +599,14 @@ public class GameManager : MonoBehaviour
         //FAIL YOU STARVED/DIED OF LACK OF SLEEP/DIED OF DIRTY
         bool shouldDie = false;
         string deathReason = "";
-        if (_sleepNeeded > MaxSleep)
+
+        if (_currentStage == EvolutionSettings.LifetimeStage.Egg ||
+            _currentStage == EvolutionSettings.LifetimeStage.Senior)
+        {
+            shouldDie = false;
+            deathReason = "";
+        }
+        else if (_sleepNeeded > MaxSleep)
         {
             deathReason = "LACK OF SLEEP";
             shouldDie = true;
@@ -683,6 +694,8 @@ public class GameManager : MonoBehaviour
                 
                 void Evolve(EvolutionPhase.EvolutionCondition condition)
                 {
+                    _completedMinigameForState = false;
+                    Midpoint.gameObject.SetActive(true);
                     PlayEvolutionAnimation(() =>
                     {
                         _currentStage = (EvolutionSettings.LifetimeStage) ((int)_currentStage) + 1;
@@ -694,6 +707,22 @@ public class GameManager : MonoBehaviour
         }
     }
 
+
+    private bool _lastTryAgainResult = false;
+    public void MinigameTryAgain()
+    {
+        _lastTryAgainResult = true;
+        TryAgainMenu.Close();
+        TryAgainMenuUp = false;
+    }
+    
+    public void MinigameNah()
+    {
+        _lastTryAgainResult = false;
+        TryAgainMenu.Close();
+        TryAgainMenuUp = false;
+    }
+
     private bool _evolving = false;
 
     public float GetNormalizedStageTime()
@@ -703,7 +732,6 @@ public class GameManager : MonoBehaviour
         float stageTime = evoTime - lastEvoTime;
         float currentStageTime = GameTime - lastEvoTime;
         float normT = currentStageTime / stageTime;
-        Debug.LogError("NORM TIME: " + normT);
         return normT;
     }
     
@@ -993,6 +1021,17 @@ public class GameManager : MonoBehaviour
             yield return new WaitForSeconds(1);
             SceneManager.LoadScene(0);
         }
+    }
+
+    public void BringUpTryAgainMenu()
+    {
+        TryAgainMenuUp = true;
+        TryAgainMenu.Open();
+    }
+
+    public bool TryAgainResult()
+    {
+        return _lastTryAgainResult;
     }
 }
 
