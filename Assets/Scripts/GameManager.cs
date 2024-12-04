@@ -126,6 +126,7 @@ public class GameManager : MonoBehaviour
     private bool _sleeping;
 
     private float _lastPoop;
+    private float _poopTimer;
 
     private MiniGame _currentMinigame = null;
 
@@ -143,10 +144,11 @@ public class GameManager : MonoBehaviour
         TryAgainMenu.Close();
     }
 
-    private bool TimeForMinigame()
+    private bool TimeForOrAfterMinigame()
     {
         return GetNormalizedStageTime() > 0.5f;
     }
+    
 
     public void Update()
     {
@@ -192,7 +194,7 @@ public class GameManager : MonoBehaviour
             _hatched = false;
             _currentHits = GeneralSettings.EggHammerHits;
 
-            if (_evolving)
+            if (_evolving || _currentMinigame != null)
             {
                 TopBar.SetActive(false);
             }
@@ -209,6 +211,10 @@ public class GameManager : MonoBehaviour
         {
             Midpoint.gameObject.SetActive(false);
         }
+        else if(!TimeForOrAfterMinigame())
+        {
+            Midpoint.gameObject.SetActive(true);
+        }
         
         //Dont perform stage logic or update anything
         if (_currentMinigame != null)
@@ -217,7 +223,7 @@ public class GameManager : MonoBehaviour
         }
 
         bool isSeniorUpdate = _currentStage == EvolutionSettings.LifetimeStage.Senior;
-        if (TimeForMinigame() && (currentPhase.StartMinigames.Count > 0) && !_completedMinigameForState || isSeniorUpdate && GeneralSettings.SeniorMinigame.Count > 0)
+        if (TimeForOrAfterMinigame() && (currentPhase.StartMinigames.Count > 0) && !_completedMinigameForState || isSeniorUpdate && GeneralSettings.SeniorMinigame.Count > 0)
         {
             Debug.Log("TIME FOR MINIGAME");
             Midpoint.gameObject.SetActive(false);
@@ -236,6 +242,11 @@ public class GameManager : MonoBehaviour
             {
                 if (g.GameType == chosenGame)
                 {
+                    MainMenu.Close();
+                    FoodMenu.Close();
+                    LightsMenu.Close();
+            
+                    EnviromentMenuSlideOff();
                     
                     _currentMinigame = g;
                     _currentMinigame.StartMinigame(chosenGame);
@@ -243,6 +254,7 @@ public class GameManager : MonoBehaviour
                     {
                         _completedMinigameForState = true;
                         MainMenu.Open();
+              
                         if (success)
                         {
                             Debug.Log("MINIGAME SUCCESS");
@@ -251,9 +263,9 @@ public class GameManager : MonoBehaviour
                         {
                             Debug.Log("MINIGAME FAILURE");
                         }
-
                         _currentMinigame = null;
                     };
+                    break;
                 }
             }
         }
@@ -291,13 +303,13 @@ public class GameManager : MonoBehaviour
             default:
                 
                 GeneralUpdate(_currentStage, firstUpdate);
-                if (Time.time - _lastPoop > 1f / GeneralSettings.PoopsPerSecond)
+                if (_poopTimer - _lastPoop > 1f / GeneralSettings.PoopsPerSecond)
                 {
                     GameObject poop = Instantiate(Poop);
                     poop.transform.parent = PoopZone;
                     var rand = Random.insideUnitCircle * 0.1f;
                     poop.transform.localPosition = new Vector2(rand.x, rand.y);
-                    _lastPoop = Time.time;
+                    _lastPoop = _poopTimer;
                     _activePoop.Add(poop);
                 }
                 _lastStage = _currentStage;
@@ -323,7 +335,7 @@ public class GameManager : MonoBehaviour
             }
         }
 
-        if (!_evolving)
+        if (!_evolving && _currentMinigame == null)
         {
             if (Input.GetKey(KeyCode.UpArrow))
             {
@@ -346,7 +358,7 @@ public class GameManager : MonoBehaviour
                 BaseChar.gameObject.SetActive(true);
                 _currentStage = EvolutionSettings.LifetimeStage.Baby;
                 UpdateStateTime();
-                _lastPoop = Time.time;
+                _lastPoop = _poopTimer;
                 MainMenu.Open();
                 return false;
             }
@@ -552,10 +564,10 @@ public class GameManager : MonoBehaviour
         float transitionTime = GeneralSettings.GetStageTransitionTime(_currentStage);
        // CounterText.text = $"{Mathf.FloorToInt(GameTime)}/{transitionTime}";
 
-       if (!_evolving)
+       if (!_evolving && _currentMinigame == null)
        {
            _hunger += Time.deltaTime * HungerGrowthSpeed;
-
+           _poopTimer += Time.deltaTime;
            if (_sleeping)
            {
                _sleepNeeded = Mathf.Max(0, _sleepNeeded - Time.deltaTime * SleepRecoverySpeed);
@@ -694,13 +706,12 @@ public class GameManager : MonoBehaviour
                 
                 void Evolve(EvolutionPhase.EvolutionCondition condition)
                 {
-                    _completedMinigameForState = false;
-                    Midpoint.gameObject.SetActive(true);
                     PlayEvolutionAnimation(() =>
                     {
                         _currentStage = (EvolutionSettings.LifetimeStage) ((int)_currentStage) + 1;
                         currentPhase = condition.Evolution;
                         BaseChar.Play(currentPhase.Speak);
+                        _completedMinigameForState = false;
                     });
                 }
             }
@@ -814,7 +825,7 @@ public class GameManager : MonoBehaviour
                 Destroy(_activePoop[idx]);
                 _activePoop.RemoveAt(idx);
             }
-            _lastPoop = Time.time;
+            _lastPoop = _poopTimer;
             
             _hunger = 0;
             _sleepNeeded = 0;

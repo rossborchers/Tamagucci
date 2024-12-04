@@ -379,8 +379,8 @@ MonoBehaviour:
   HW40Percent: {fileID: 1554445621197099743}
   HW20Percent: {fileID: 8216371277814712132}
   HW10Percent: {fileID: 5806206571411209774}
-  AmountPerClick: 0.1
-  PagesToEat: 4
+  AmountPerClick: 0.2
+  PagesToEat: 3
 --- !u!1 &2484912222014421297
 GameObject:
   m_ObjectHideFlags: 0

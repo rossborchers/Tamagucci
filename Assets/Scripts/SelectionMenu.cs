@@ -165,5 +165,14 @@ public class SelectionMenu : MonoBehaviour
     {
         open = false;
         Root.SetActive(false);
+
+        //unselect everything!
+        foreach (SelectionOption option in Options)
+        {
+            foreach (var selected in option.Selected)
+            {
+                selected.gameObject.SetActive(false);
+            }
+        }
     }
 }
